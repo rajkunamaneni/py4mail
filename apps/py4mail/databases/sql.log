@@ -1,0 +1,100 @@
+timestamp: 2023-05-23T21:50:19.347329
+CREATE TABLE "py4web_session"(
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "rkey" CHAR(512),
+    "rvalue" TEXT,
+    "expiration" INTEGER,
+    "created_on" TIMESTAMP,
+    "expires_on" TIMESTAMP
+);
+success!
+timestamp: 2023-05-23T21:50:19.349480
+CREATE TABLE "auth_user"(
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "username" CHAR(512) UNIQUE,
+    "email" CHAR(512) UNIQUE,
+    "password" CHAR(512),
+    "first_name" CHAR(512),
+    "last_name" CHAR(512),
+    "sso_id" CHAR(512),
+    "action_token" CHAR(512),
+    "last_password_change" TIMESTAMP,
+    "past_passwords_hash" TEXT
+);
+success!
+timestamp: 2023-05-23T21:50:19.351047
+CREATE TABLE "auth_user_tag_groups"(
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "tagpath" CHAR(512),
+    "record_id" INTEGER REFERENCES "auth_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE  
+);
+success!
+timestamp: 2023-05-25T15:29:10.755835
+CREATE TABLE "emails"(
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "sender_id" INTEGER REFERENCES "auth_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE  ,
+    "receiver_id" INTEGER REFERENCES "auth_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE  ,
+    "title" TEXT,
+    "message" TEXT,
+    "sent_at" TIMESTAMP
+);
+success!
+timestamp: 2023-05-25T15:30:52.753750
+CREATE TABLE "stared"(
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "email_id" INTEGER REFERENCES "auth_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE  ,
+    "receiver_id" INTEGER REFERENCES "auth_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE  ,
+    "title" TEXT,
+    "message" TEXT,
+    "sent_at" TIMESTAMP,
+    "starred" CHAR(1)
+);
+success!
+timestamp: 2023-05-25T15:30:52.755955
+CREATE TABLE "trash"(
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "sender_id" INTEGER REFERENCES "auth_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE  ,
+    "receiver_id" INTEGER REFERENCES "auth_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE  ,
+    "sender_email" TEXT,
+    "receiver_email" TEXT,
+    "title" TEXT,
+    "message" TEXT,
+    "sent_at" TIMESTAMP
+);
+success!
+timestamp: 2023-05-25T15:48:10.521095
+ALTER TABLE "emails" ADD "email_address" TEXT;
+success!
+timestamp: 2023-05-25T15:48:10.530799
+ALTER TABLE "stared" ADD "email_address" TEXT;
+success!
+timestamp: 2023-05-25T15:48:10.544406
+ALTER TABLE "trash" ADD "email_address" TEXT;
+success!
+timestamp: 2023-05-25T16:10:19.703007
+ALTER TABLE "emails" ADD "r_username" INTEGER REFERENCES "auth_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE  ;
+timestamp: 2023-05-25T16:10:19.728588
+ALTER TABLE "emails" ADD "s_username" INTEGER REFERENCES "auth_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE  ;
+success!
+timestamp: 2023-05-25T16:10:19.734223
+ALTER TABLE "stared" ADD "r_username" INTEGER REFERENCES "auth_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE  ;
+timestamp: 2023-05-25T16:10:19.735466
+ALTER TABLE "stared" ADD "s_username" INTEGER REFERENCES "auth_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE  ;
+success!
+timestamp: 2023-05-25T16:10:19.745081
+ALTER TABLE "trash" ADD "r_username" INTEGER REFERENCES "auth_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE  ;
+timestamp: 2023-05-25T16:10:19.746841
+ALTER TABLE "trash" ADD "s_username" INTEGER REFERENCES "auth_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE  ;
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!

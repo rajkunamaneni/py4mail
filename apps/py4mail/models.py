@@ -19,34 +19,59 @@ def get_time():
     return datetime.datetime.utcnow()
 
 
-### Define your table below
-#
-# db.define_table('thing', Field('name'))
-#
-## always commit your models to avoid problems later
+db.define_table(
+    'emails',
+    
+    Field('sender_id', 'reference auth_user'),
+    Field('receiver_id', 'reference auth_user'),
+    Field('title', 'text'),
+    Field('message', 'text'),
+    Field('sent_at', 'datetime', default=get_time())
+)
+    
+stared = db.define_table(
+    'stared',
+    Field('r_username', 'reference auth_user'),
+    Field('s_username', 'reference auth_user'), 
+    Field('email_id', 'reference auth_user'),
+    Field('receiver_id', 'reference auth_user'),
+    Field('title', 'text'),
+    Field('message', 'text'),
+    Field('sent_at', 'datetime', default=get_time()),
+    Field('starred', 'boolean')
+)
 
+trash = db.define_table(
+    'trash',
+    Field('r_username', 'reference auth_user'),
+    Field('s_username', 'reference auth_user'), 
+    Field('sender_id', 'reference auth_user'),
+    Field('receiver_id', 'reference auth_user'),
+    Field('sender_email', 'text'),
+    Field('receiver_email', 'text'),
+    Field('title', 'text'),
+    Field('message', 'text'),
+    Field('sent_at', 'datetime', default=get_time()),
+)
 db.commit()
 
-def add_users_for_testing(num_users):
-    # Test user names begin with "_".
-    # Counts how many users we need to add.
-    db(db.auth_user.username.startswith("_")).delete()
-    num_test_users = db(db.auth_user.username.startswith("_")).count()
-    num_new_users = num_users - num_test_users
-    print("Adding", num_new_users, "users.")
-    for k in range(num_test_users, num_users):
-        first_name = random.choice(FIRST_NAMES)
-        last_name = first_name = random.choice(LAST_NAMES)
-        username = "_%s%.2i" % (first_name.lower(), k)
-        user = dict(
-            username=username,
-            email=username + "@ucsc.edu",
-            first_name=first_name,
-            last_name=last_name,
-            password=username,  # To facilitate testing.
-        )
-        auth.register(user, send=False)
+def add_emails_for_testing():
+    db.emails.insert(
+                    sender_id=17,
+                    receiver_id=16,
+                    title='helllllllo',
+                    message='just saying hi!!! :)',
+                    )
+    db.emails.insert(
+                    sender_id=17,
+                    receiver_id=16,
+                    title='whats up',
+                    message='just saying hi again!!! :)',
+                    )
     db.commit()
-    
-# Comment out this line if you are not interested. 
-add_users_for_testing(5)
+
+add_emails_for_testing()
+
+
+
+
