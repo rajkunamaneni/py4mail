@@ -22,6 +22,11 @@ let init = (app) => {
 
   // This contains all the methods.
   app.methods = {
+    formatEmailsByTime: function () {
+      app.vue.emails.sort(function (a, b) {
+        return new Date(b.sent_at) - new Date(a.sent_at);
+      });
+    },
     // Complete as you see fit.
     getTrash: function() {
       axios.get(get_trash).then(function (response) {
@@ -51,6 +56,7 @@ let init = (app) => {
         console.log(email);
         app.data.emails_as_dict[email.id] = email;
       });
+      app.methods.formatEmailsByTime();
     });
   };
 

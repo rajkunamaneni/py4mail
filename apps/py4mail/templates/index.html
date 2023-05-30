@@ -4,31 +4,102 @@
 [v-cloak] {
   display: none;
 }
+.search-container {
+  display: flex;
+  align-items: center;
+}
+
+.search-container input.input {
+  margin-right: 40rem;
+}
+
+tr:hover {
+    background-color: rgb(239, 239, 239);
+    cursor: pointer;
+  }
 </style>
-
-<div class="section" id="vue-target" v-cloak>
+<div class="section mt-0" id="vue-target" v-cloak>
   <!-- Put your Vue.js template here -->
-  <div class="columns is-mobile">
-    <div class="column is-one-third">
-      <div>Compose</div>
-      <div>Inbox</div>
-      <div>Starred</div>
-      <div>Trash</div>
+  <div class="columns">
+    <div class="column is-one-fifth">
+      <div class="mb-2">
+        <a class="button is-medium" style="border-radius: 20px">
+          <span class="icon">
+            <i class="fa fa-edit"></i>
+          </span>
+          <span>Compose</span>
+        </a>
+      </div>
+      <aside class="menu">
+        <ul class="menu-list">
+          <div>
+            <li><a style="border-radius: 20px">
+              <span class="icon">
+                <i class="fa fa-inbox" style="color: #1d76c9;"></i>
+              </span>
+              <span>Inbox</span></a></li>
+          </div>
+          <div>
+            <li><a style="border-radius: 20px">
+              <span class="icon">
+                <i class="fa fa-star" style="color: yellow;"></i>
+              </span>
+              <span>Starred</span></a></li>
+          </div>
+          <div>
+            <li><a style="border-radius: 20px">
+              <span class="icon">
+                <i class="fa fa-paper-plane" style="color: #ababab;"></i>
+              </span>
+              <span>Sent</span></a></li>
+          </div>
+          <div>
+            <li><a style="border-radius: 20px">
+              <span class="icon">
+                <i class="fa fa-trash" style="color: #c64524;"></i>
+              </span>
+              <span>Trash</span></a></li>
+          </div>
+          <!-- <a class="is-active">Manage Your Team</a> -->
+        </ul>
+      </aside>
     </div>
-
-    <div class="column is-full">
-      <div class="field">
-        <div class="control">
-          <input class="input" type="text" placeholder="Search">
+    <div class="is-four-fifths">
+      <div class="field mb-2">
+        <div class="search-container">
+          <span>
+            <input class="input" type="text" placeholder="Search in mail">
+          </span>
+          <span>
+          <button class="button">
+            <span class="icon">
+              <i class="fa fa-search"></i>
+            </span>
+          </button>
+          </span>
         </div>
       </div>
-      <div class="field has-addons" v-for="email in emails" :key="email.id" class="email">
-        <p class="control">
-          <button class="button">
-            <span>{{ email }}</span>
-          </button>
-        </p>
-      </div>
+      <table class="table is-narrow is-fullwidth">
+        <tbody>
+          <tr class="field has-addons my-0 pt-2" v-for="email in emails" :key="email.id" class="email">
+            <td style="width: 13rem">
+              <span>
+                <label class="checkbox mt-1 mr-1">
+                  <input type="checkbox">
+                </label>
+                <span class="icon checkbox">
+                  <i class="fa fa-star"  style="color: #e3e3e3"></i>
+                  <!-- <i class="fa fa-star"  style="color: yellow"></i> -->
+                </span>
+                <span>{{email.sender_name}}</span>
+              </span>
+            </td>
+            <td style="width: 50rem">{{email.message}}</td>
+            <td style="width: 8rem">{{email.elapsed_time}}</td>
+          </tr>
+          <!-- Add more email rows here -->
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
