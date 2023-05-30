@@ -14,16 +14,14 @@
       <div>Inbox</div>
       <div>Starred</div>
       <div>Trash</div>
+    </div>
 
-      <!-- <div class="field">
+    <div class="column is-full">
+      <div class="field">
         <div class="control">
           <input class="input" type="text" placeholder="Search">
         </div>
-      </div> -->
-    </div>
-
-    <div class="column is-two-third">
-      This is where the emails will go...
+      </div>
       <div class="field has-addons" v-for="email in emails" :key="email.id" class="email">
         <p class="control">
           <button class="button">
