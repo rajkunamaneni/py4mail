@@ -75,9 +75,9 @@ def move_to_trash():
     email = db.emails(mail_id)
     email.update_record(isTrash=True)
 
-@action("delete")
-@action.uses(db, auth.user)
-def delete():
+# @action("delete")
+# @action.uses(db, auth.user)
+# def delete():
     
 
 
