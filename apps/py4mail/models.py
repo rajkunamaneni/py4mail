@@ -3,7 +3,6 @@ This file defines the database models
 """
 
 import datetime
-import random
 from py4web.utils.populate import FIRST_NAMES, LAST_NAMES, IUP
 from .common import db, Field, auth
 from pydal.validators import *
@@ -18,41 +17,23 @@ def get_username():
 def get_time():
     return datetime.datetime.utcnow()
 
-
 db.define_table(
     'emails',
-    
     Field('sender_id', 'reference auth_user'),
     Field('receiver_id', 'reference auth_user'),
     Field('title', 'text'),
     Field('message', 'text'),
-    Field('sent_at', 'datetime', default=get_time())
-)
-    
-stared = db.define_table(
-    'stared',
-    Field('r_username', 'reference auth_user'),
-    Field('s_username', 'reference auth_user'), 
-    Field('email_id', 'reference auth_user'),
-    Field('receiver_id', 'reference auth_user'),
-    Field('title', 'text'),
-    Field('message', 'text'),
     Field('sent_at', 'datetime', default=get_time()),
-    Field('starred', 'boolean')
+    Field('isStarred', 'boolean', default=False),
+    Field('isTrash', 'boolean', default=False),
 )
 
-trash = db.define_table(
-    'trash',
-    Field('r_username', 'reference auth_user'),
-    Field('s_username', 'reference auth_user'), 
-    Field('sender_id', 'reference auth_user'),
-    Field('receiver_id', 'reference auth_user'),
-    Field('sender_email', 'text'),
-    Field('receiver_email', 'text'),
-    Field('title', 'text'),
-    Field('message', 'text'),
-    Field('sent_at', 'datetime', default=get_time()),
+db.define_table(
+    'blocked',
+    Field('created_by', 'reference auth_user', default=lambda: get_user_email()),
+    Field('blocked_id', 'reference auth_user'),
 )
+
 db.commit()
 
 def add_emails_for_testing():

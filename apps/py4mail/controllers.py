@@ -10,10 +10,6 @@ from .models import get_username
 
 # url_signer = URLSigner(session)
 
-# Some constants.
-MAX_RETURNED_USERS = 20 # Our searches do not return more than 20 users.
-MAX_RESULTS = 20 # Maximum number of returned meows. 
-
 @action('index')
 @action.uses('index.html', db, auth.user)
 def index():
@@ -22,27 +18,44 @@ def index():
 @action("get_emails")
 @action.uses(db, auth.user)
 def get_emails():
-    emails = db(db.emails.receiver_id == auth.user_id).select().as_list() 
-    print(emails)
-    return dict(emails=emails
+    all_emails = db(db.emails.receiver_id == auth.user_id).select().as_list()
+    star_emails = db((db.emails.receiver_id == auth.user_id) & (db.emails.isStarred == True)).select().as_list()
+    trash_emails = db((db.emails.receiver_id == auth.user_id) & (db.emails.isTrash == True)).select().as_list()
+    return dict(emails=emails,
+                star_emails=star_emails,
+                trash_emails=trash_emails,
     )
 
-@action("get_starred")
+@action("move_to_trash")
 @action.uses(db, auth.user)
-def get_starrred():
-    emails = db(db.stared.receiver_id == auth.user_id).select().as_list() 
-    return dict(emails=emails)
+def move_to_trash():
+    mail_id = request.json.get('id')
+    email = db.emails(mail_id)
+    email.update_record(isTrash=True)
 
-
-
-@action("get_trash")
+@action("delete")
 @action.uses(db, auth.user)
-def get_trash():
-    emails = db(db.trash.receiver_id == auth.user_id).select().as_list()
-    return dict(emails=emails)
+def delete():
+    
 
-# @action("set_follow", method="POST")
-# @action.uses(db, auth.user)
-# def set_follow():
-#     # Implement.
-#     return "ok"
+
+    
+    
+@action("blocked")
+@action.uses(db, auth.user)
+def blocked():
+    data = request.json
+    user_id = data.get('id')
+    block_user = db((db.blocked.created_by == auth.user_id) & (db.blocked.blocked_id == auth.user_id)).select().first()
+    if block_user:
+        block_user.delete_record(db.blocked[0]['id'])
+    else:
+        db.blocked.insert(created_by=auth.user_id, blocked_id=user_id)
+
+
+## Delete later. Added for context of understanding blocked function
+# db.define_table(
+#     'blocked',
+#     Field('created_by', 'reference auth_user', default=lambda: get_user_email()),
+#     Field('blocked_id', 'reference auth_user'),
+# )

@@ -98,3 +98,39 @@ success!
 success!
 success!
 success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+timestamp: 2023-05-29T21:13:05.313163
+ALTER TABLE "emails" ADD "isstarred" CHAR(1);
+timestamp: 2023-05-29T21:13:05.316292
+ALTER TABLE "emails" ADD "istrash" CHAR(1);
+success!
+success!
+timestamp: 2023-05-29T21:36:56.918546
+CREATE TABLE "blocked"(
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "created_by" INTEGER REFERENCES "auth_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE  ,
+    "blocked_id" INTEGER REFERENCES "auth_user" ("id") ON DELETE CASCADE ON UPDATE CASCADE  
+);
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
+success!
