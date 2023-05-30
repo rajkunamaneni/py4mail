@@ -21,7 +21,7 @@ def get_emails():
     all_emails = db(db.emails.receiver_id == auth.user_id).select().as_list()
     star_emails = db((db.emails.receiver_id == auth.user_id) & (db.emails.isStarred == True)).select().as_list()
     trash_emails = db((db.emails.receiver_id == auth.user_id) & (db.emails.isTrash == True)).select().as_list()
-    return dict(emails=emails,
+    return dict(emails=all_emails,
                 star_emails=star_emails,
                 trash_emails=trash_emails,
     )
@@ -33,10 +33,10 @@ def move_to_trash():
     email = db.emails(mail_id)
     email.update_record(isTrash=True)
 
-@action("delete")
-@action.uses(db, auth.user)
-def delete():
-    
+# @action("delete")
+# @action.uses(db, auth.user)
+# def delete():
+
 
 
     
