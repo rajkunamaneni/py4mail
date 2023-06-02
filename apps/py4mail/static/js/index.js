@@ -51,7 +51,6 @@ let init = (app) => {
     getInbox: function() {
       app.methods.getGlobal(null, 'isTrash');
     },    
-
     //get the mails from trash
     getTrash: function() {
       app.methods.getGlobal(true, 'isTrash');
