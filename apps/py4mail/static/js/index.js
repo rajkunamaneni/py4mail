@@ -30,7 +30,7 @@ let init = (app) => {
       });
     },
 
-    //One function with a 
+    //One function that get the information for the three different types of mails
     //param of `type` to get the mails from inbox, trash, or starred
     getGlobal: function(type) {
       app.vue.mailOption = 0;
