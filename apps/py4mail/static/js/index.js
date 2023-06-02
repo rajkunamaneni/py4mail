@@ -29,51 +29,39 @@ let init = (app) => {
         return new Date(b.sent_at) - new Date(a.sent_at);
       });
     },
+
+    //One function with a 
+    //param of `type` to get the mails from inbox, trash, or starred
+    getGlobal: function(type) {
+      app.vue.mailOption = 0;
+      axios.get(get_emails_url).then(function(response) {
+        app.data.emails_as_dict = {};
+        app.vue.emails = app.enumerate(response.data.emails).filter(function(email) {
+          if (email.isTrash === type) {
+            app.data.emails_as_dict[email.id] = email;
+            return true;
+          }
+          return false;
+        });
+        app.methods.formatEmailsByTime();
+      });
+    },
+
     //get the mails from inbox
     getInbox: function() {
-      app.vue.mailOption = 0;
-      axios.get(get_emails_url).then(function(response) {
-        app.data.emails_as_dict = {};
-        app.vue.emails = app.enumerate(response.data.emails).filter(function(email) {
-          if (email.isTrash === null) {
-            app.data.emails_as_dict[email.id] = email;
-            return true;
-          }
-          return false;
-        });
-        app.methods.formatEmailsByTime();
-      });
+      app.methods.getGlobal(null);
     },    
+
     //get the mails from trash
     getTrash: function() {
-      app.vue.mailOption = 0;
-      axios.get(get_emails_url).then(function(response) {
-        app.data.emails_as_dict = {};
-        app.vue.emails = app.enumerate(response.data.emails).filter(function(email) {
-          if (email.isTrash === true) {
-            app.data.emails_as_dict[email.id] = email;
-            return true;
-          }
-          return false;
-        });
-        app.methods.formatEmailsByTime();
-      });
+      app.methods.getGlobal(true);
     },
+
     //get the mails from starred
     getStarred: function() { 
-      app.vue.mailOption = 0;
-      axios.get(get_emails_url).then(function(response) {
-        app.data.emails_as_dict = {};
-        app.vue.emails = app.enumerate(response.data.emails).filter(function(email) {
-          if (email.isStarred === true) {
-            app.data.emails_as_dict[email.id] = email;
-            return true;
-          }
-          return false;
-        });
-        app.methods.formatEmailsByTime();
-      });
+      app.methods.getGlobal(true);
     },
+
     // view individual mail 
     viewMail: function(email_id) {
       console.log(email_id);
