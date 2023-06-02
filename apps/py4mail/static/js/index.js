@@ -9,6 +9,8 @@ let init = (app) => {
   app.data = {
     emails: [],
     emails_as_dict: {},
+    mailOption: 0, // 0 = list, 1 = individual mail
+    mail: {}
   };
 
   app.enumerate = (a) => {
@@ -27,17 +29,56 @@ let init = (app) => {
         return new Date(b.sent_at) - new Date(a.sent_at);
       });
     },
-    // Complete as you see fit.
-    getTrash: function() {
-      axios.get(get_trash).then(function (response) {
-        app.vue.emails = app.enumerate(response.data.emails);
-      })
-    },
-    
-    getStarred: function() {  
-      axios.get(get_emails_url).then(function (response) {
-        app.vue.emails = app.enumerate(response.data.emails);
+    //get the mails from inbox
+    getInbox: function() {
+      app.vue.mailOption = 0;
+      axios.get(get_emails_url).then(function(response) {
+        app.data.emails_as_dict = {};
+        app.vue.emails = app.enumerate(response.data.emails).filter(function(email) {
+          if (email.isTrash === null) {
+            app.data.emails_as_dict[email.id] = email;
+            return true;
+          }
+          return false;
+        });
+        app.methods.formatEmailsByTime();
       });
+    },    
+    //get the mails from trash
+    getTrash: function() {
+      app.vue.mailOption = 0;
+      axios.get(get_emails_url).then(function(response) {
+        app.data.emails_as_dict = {};
+        app.vue.emails = app.enumerate(response.data.emails).filter(function(email) {
+          if (email.isTrash === true) {
+            app.data.emails_as_dict[email.id] = email;
+            return true;
+          }
+          return false;
+        });
+        app.methods.formatEmailsByTime();
+      });
+    },
+    //get the mails from starred
+    getStarred: function() { 
+      app.vue.mailOption = 0;
+      axios.get(get_emails_url).then(function(response) {
+        app.data.emails_as_dict = {};
+        app.vue.emails = app.enumerate(response.data.emails).filter(function(email) {
+          if (email.isStarred === true) {
+            app.data.emails_as_dict[email.id] = email;
+            return true;
+          }
+          return false;
+        });
+        app.methods.formatEmailsByTime();
+      });
+    },
+    // view individual mail 
+    viewMail: function(email_id) {
+      console.log(email_id);
+      app.vue.mailOption = 1; //switch to individual mail
+      app.vue.mail = email_id;
     },
   };
 
@@ -50,14 +91,8 @@ let init = (app) => {
 
   // And this initializes it.
   app.init = () => {
-    axios.get(get_emails_url).then(function (response) {
-      app.vue.emails = app.enumerate(response.data.emails);
-      app.vue.emails.map(function(email) {
-        console.log(email);
-        app.data.emails_as_dict[email.id] = email;
-      });
-      app.methods.formatEmailsByTime();
-    });
+    //get mails from inbox by default
+    app.methods.getInbox();
   };
 
   // Call to the initializer.
