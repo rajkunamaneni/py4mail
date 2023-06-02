@@ -37,7 +37,7 @@ let init = (app) => {
       axios.get(get_emails_url).then(function(response) {
         app.data.emails_as_dict = {};
         app.vue.emails = app.enumerate(response.data.emails).filter(function(email) {
-          if (email.isTrash === type) {
+          if (type) {
             app.data.emails_as_dict[email.id] = email;
             return true;
           }
@@ -49,17 +49,17 @@ let init = (app) => {
 
     //get the mails from inbox
     getInbox: function() {
-      app.methods.getGlobal(null);
+      app.methods.getGlobal(email.isTrash === null);
     },    
 
     //get the mails from trash
     getTrash: function() {
-      app.methods.getGlobal(true);
+      app.methods.getGlobal(email.isTrash === true);
     },
 
     //get the mails from starred
     getStarred: function() { 
-      app.methods.getGlobal(true);
+      app.methods.getGlobal(email.isStarred === true);
     },
 
     // view individual mail 
