@@ -51,6 +51,14 @@ let init = (app) => {
     getInbox: function() {
       app.methods.getGlobal(null, 'isTrash');
     },    
+    getSent: function() {
+      app.vue.mailOption = 2;
+      axios.get(get_sent_url).then(function(response) {
+        app.data.emails_as_dict = {};
+        app.vue.emails = app.enumerate(response.data.emails);
+        app.methods.formatEmailsByTime();
+      });
+    },
     //get the mails from trash
     getTrash: function() {
       app.methods.getGlobal(true, 'isTrash');
@@ -67,6 +75,24 @@ let init = (app) => {
       app.vue.mailOption = 1; //switch to individual mail
       app.vue.mail = email_id;
     },
+    test: function(arg) {
+      console.log("Button clicked!!!");
+      console.log(arg);
+      let email = {};
+      email.receiver_mail = "test@gmail.com";
+      email.title = "This is the title";
+      email.content = "This is the content of the email";
+      console.log(email);
+      axios
+      .post(get_compose_url, { email: email })
+      .then(function(response) {
+        if (response.data === "Mail sent successfully") {
+          app.methods.getInbox();
+        }      })
+      .catch(function(error) {
+        console.error(error);
+      });
+    }
   };
 
   // This creates the Vue instance.
