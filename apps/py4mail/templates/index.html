@@ -51,13 +51,13 @@
               </span>
               <span>Starred</span></a></li>
           </div>
-          <!-- <div>
+          <div>
             <li><a style="border-radius: 20px" @click="getSent">
               <span class="icon">
                 <i class="fa fa-paper-plane" style="color: #ababab;"></i>
               </span>
               <span>Sent</span></a></li>
-          </div> -->
+          </div>
           <div>
             <li><a style="border-radius: 20px" @click="getTrash">
               <span class="icon">
@@ -96,7 +96,8 @@
                   <i class="fa fa-star"  :style="{ color: email.isStarred ? 'yellow' : '#e3e3e3' }"></i>
                   <!-- <i class="fa fa-star"  style="color: yellow"></i> -->
                 </span>
-                <span>{{email.sender_name}}</span>
+                  <span v-if="mailOption === 0">{{email.sender_name}}</span>
+                  <span v-if="mailOption === 2">{{email.receiver_name}}</span>
               </span>
             </td>
             <td style="width: 50rem">{{email.message}}</td>
@@ -153,6 +154,7 @@
 <!-- Loads the index-specific js for Vue -->
 <script>
   let get_emails_url = "[[=XML(get_emails_url)]]";
+  let get_sent_url = "[[=XML(get_sent_url)]]";
 </script>
 <script src="js/vue.js"></script>
 <script src="js/axios.min.js"></script>

@@ -51,6 +51,14 @@ let init = (app) => {
     getInbox: function() {
       app.methods.getGlobal(null, 'isTrash');
     },    
+    getSent: function() {
+      app.vue.mailOption = 2;
+      axios.get(get_sent_url).then(function(response) {
+        app.data.emails_as_dict = {};
+        app.vue.emails = app.enumerate(response.data.emails);
+        app.methods.formatEmailsByTime();
+      });
+    },
     //get the mails from trash
     getTrash: function() {
       app.methods.getGlobal(true, 'isTrash');
