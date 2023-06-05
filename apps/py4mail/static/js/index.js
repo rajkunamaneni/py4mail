@@ -29,13 +29,15 @@ let init = (app) => {
         return new Date(b.sent_at) - new Date(a.sent_at);
       });
     },
-    //get the mails from inbox
-    getInbox: function() {
+
+    //One function that get the information for the three different types of mails
+    //param of `type` to get the mails from inbox, trash, or starred
+    getGlobal: function(type, isType) {
       app.vue.mailOption = 0;
       axios.get(get_emails_url).then(function(response) {
         app.data.emails_as_dict = {};
         app.vue.emails = app.enumerate(response.data.emails).filter(function(email) {
-          if (email.isTrash === null) {
+          if (email[isType] === type) {
             app.data.emails_as_dict[email.id] = email;
             return true;
           }
@@ -43,37 +45,22 @@ let init = (app) => {
         });
         app.methods.formatEmailsByTime();
       });
+    },
+
+    //get the mails from inbox
+    getInbox: function() {
+      app.methods.getGlobal(null, 'isTrash');
     },    
     //get the mails from trash
     getTrash: function() {
-      app.vue.mailOption = 0;
-      axios.get(get_emails_url).then(function(response) {
-        app.data.emails_as_dict = {};
-        app.vue.emails = app.enumerate(response.data.emails).filter(function(email) {
-          if (email.isTrash === true) {
-            app.data.emails_as_dict[email.id] = email;
-            return true;
-          }
-          return false;
-        });
-        app.methods.formatEmailsByTime();
-      });
+      app.methods.getGlobal(true, 'isTrash');
     },
+
     //get the mails from starred
     getStarred: function() { 
-      app.vue.mailOption = 0;
-      axios.get(get_emails_url).then(function(response) {
-        app.data.emails_as_dict = {};
-        app.vue.emails = app.enumerate(response.data.emails).filter(function(email) {
-          if (email.isStarred === true) {
-            app.data.emails_as_dict[email.id] = email;
-            return true;
-          }
-          return false;
-        });
-        app.methods.formatEmailsByTime();
-      });
+      app.methods.getGlobal(true, 'isStarred');
     },
+
     // view individual mail 
     viewMail: function(email_id) {
       console.log(email_id);
