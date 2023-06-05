@@ -14,7 +14,7 @@ url_signer = URLSigner(session)
 @action('index')
 @action.uses('index.html', db, auth.user)
 def index():
-    return dict(get_emails_url = URL('get_emails'), get_sent_url = URL('get_sent'))
+    return dict(get_emails_url = URL('get_emails'), get_sent_url = URL('get_sent'), get_compose_url = URL('compose_mail'))
 
 @action("get_emails")
 @action.uses(db, auth.user)
@@ -104,9 +104,10 @@ def blocked():
         db.blocked.insert(created_by=auth.user_id, blocked_id=user_id)
 
 @action('compose_mail', method=['GET', 'POST'])
-@action.uses('compose_mail.html', url_signer, db, session, auth.user)
+@action.uses(url_signer, db, session, auth.user)
 def compose_mail():
-    form = Form(db.emails, csrf_session = session, formstyle = FormStyleBulma)
-    if form.accepted:
-        redirect(URL('index'))
-    return dict(form=form)   
+    email = request.json.get('email')
+    # email = {receiver_mail: 'test@gmail.com', title: 'This is the title', content: 'This is the content of the email'}
+    print(email)
+    return "Mail sent successfully"
+    
