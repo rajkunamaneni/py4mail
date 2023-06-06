@@ -13,7 +13,10 @@ from .models import get_username
 @action('index')
 @action.uses('index.html', db, auth.user)
 def index():
-    return dict(get_emails_url = URL('get_emails'))
+    return dict(get_emails_url = URL('get_emails'),
+                trash_url = URL('move_to_trash'),
+                delete_url = URL('delete'),
+                star_url = URL('star'),)
 
 @action("get_emails")
 @action.uses(db, auth.user)
@@ -34,6 +37,7 @@ def get_emails():
         email['sender_name'] = sender_names.get(email['sender_id'])
         email['receiver_name'] = receiver_name
         email['elapsed_time'] = get_elapsed_time(email['sent_at'])
+    print(emails)
     return dict(emails=emails)
 
 def get_elapsed_time(created_on):
@@ -58,19 +62,38 @@ def get_elapsed_time(created_on):
 
     return elapsed_time
 
-@action("move_to_trash")
+@action("move_to_trash", method="POST")
 @action.uses(db, auth.user)
 def move_to_trash():
     mail_id = request.json.get('id')
     email = db.emails(mail_id)
     email.update_record(isTrash=True)
+    return dict(mail_id=mail_id,)
 
-@action("delete")
+
+@action("delete", method="POST")
 @action.uses(db, auth.user)
 def delete():
-    pass
+    mail_id = request.json.get('id')
+    db(db.emails.id == mail_id).delete()
+    return dict(mail_id=mail_id,)
+
+@action("star", method="POST")
+@action.uses(db, auth.user)
+def star():
+    starred = False
+    mail_id = request.json.get('id')
+    email = db.emails(mail_id)
+    if email.isStarred == True:
+        email.update_record(isStarred=False)
+    else:
+        email.update_record(isStarred = True)
+        starred = True
+    return dict(mail_id = mail_id,
+                starred = starred)
+
     
-@action("blocked")
+@action("blocked", method="POST")
 @action.uses(db, auth.user)
 def blocked():
     data = request.json
