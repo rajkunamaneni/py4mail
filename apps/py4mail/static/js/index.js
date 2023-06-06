@@ -49,7 +49,7 @@ let init = (app) => {
 
     //get the mails from inbox
     getInbox: function() {
-      app.methods.getGlobal(null, 'isTrash');
+      app.methods.getGlobal(false, 'isTrash');
     },    
     //get the mails from trash
     getTrash: function() {
@@ -66,6 +66,55 @@ let init = (app) => {
       console.log(email_id);
       app.vue.mailOption = 1; //switch to individual mail
       app.vue.mail = email_id;
+    },
+    
+    // trash or delete the email
+    trashOrDeleteMail: function(email_id) {
+      app.vue.emails.forEach(function(email){
+        if (email.id === email_id) {
+          if (email.isTrash === true) {
+            axios.post(delete_url,
+              {
+                id: email.id,
+              }).then(function(response) {
+                app.vue.emails.splice(app.vue.emails.indexOf(email), 1);
+                delete app.vue.emails_as_dict[email];
+              });
+          } else {
+            axios.post(trash_url,
+              {
+                id: email.id,
+              }).then(function(response) {
+                app.vue.emails.indexOf(email).isTrash = true;
+              });
+          }
+        }
+
+      });
+      
+    },
+
+    starMail: function(email_id) {
+      axios.post(star_url,
+        {
+          id: email_id,
+        }).then(function(response) {
+          app.vue.emails.forEach(function(email){
+            if (email.id === email_id) {
+              new_email = email;
+              if (email.isStarred === true) {
+                new_email.isStarred = false;
+              } else {
+                new_email.isStarred = true;
+              }
+              app.vue.emails.splice(app.vue.emails.indexOf(email), 1);
+              app.vue.emails.push(new_email);
+            }
+
+          });
+
+        });
+
     },
   };
 

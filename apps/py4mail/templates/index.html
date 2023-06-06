@@ -93,13 +93,13 @@
                   <input type="checkbox">
                 </label>
                 <span class="icon checkbox">
-                  <i class="fa fa-star"  :style="{ color: email.isStarred ? 'yellow' : '#e3e3e3' }"></i>
+                  <button class="fa fa-star"  :style="{ color: email.isStarred ? 'yellow' : '#e3e3e3' }" @click="starMail(email.id)"></button>
                   <!-- <i class="fa fa-star"  style="color: yellow"></i> -->
                 </span>
                 <span>{{email.sender_name}}</span>
               </span>
             </td>
-            <td style="width: 50rem">{{email.message}}</td>
+            <td style="width: 50rem">{{email.title}}</td>
             <td style="width: 8rem">{{email.elapsed_time}}</td>
           </tr>
           <!-- Add more email rows here -->
@@ -131,11 +131,11 @@
             </td>
             <td>
               <span class="mt-1 icon">
-                <i class="fa fa-star" :style="{ color: mail.isStarred ? 'yellow' : '#e3e3e3' }"></i>
+                <button class="fa fa-star" :style="{ color: mail.isStarred ? 'yellow' : '#e3e3e3' }"></button>
                 <!-- <i class="fa fa-star" style="color: yellow;"></i> -->
               </span>
               <span class="mt-1 icon">
-                <i class="fa fa-trash" style="color: #c64524;"></i>
+                <button class="fa fa-trash" style="color: #c64524;" @click="trashOrDeleteMail(mail.id)"></button>
               </span>
               <span style="font-size: 13px">{{ mail.sent_at }}</span>
             </td>
@@ -153,6 +153,9 @@
 <!-- Loads the index-specific js for Vue -->
 <script>
   let get_emails_url = "[[=XML(get_emails_url)]]";
+  let trash_url = "[[=XML(trash_url)]]";
+  let delete_url = "[[=XML(delete_url)]]";
+  let star_url = "[[=XML(star_url)]]";
 </script>
 <script src="js/vue.js"></script>
 <script src="js/axios.min.js"></script>

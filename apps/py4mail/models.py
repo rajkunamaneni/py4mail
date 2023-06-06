@@ -36,22 +36,7 @@ db.define_table(
 
 db.commit()
 
-def add_emails_for_testing():
-    db.emails.insert(
-                    sender_id=17,
-                    receiver_id=16,
-                    title='helllllllo',
-                    message='just saying hi!!! :)',
-                    )
-    db.emails.insert(
-                    sender_id=17,
-                    receiver_id=16,
-                    title='whats up',
-                    message='just saying hi again!!! :)',
-                    )
-    db.commit()
 
-add_emails_for_testing()
 
 
 
