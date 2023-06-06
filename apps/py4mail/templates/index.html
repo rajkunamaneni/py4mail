@@ -26,13 +26,20 @@
   background-color: #f5f5f5;
 }
 
+.compose-form {
+    position: fixed;
+    bottom: 10px;
+    right: 30px;
+    width: 500px;
+  }
+
 </style>
 <div class="section mt-0" id="vue-target" v-cloak style="background-color: #f5f4f4;">
   <!-- Put your Vue.js template here -->
   <div class="columns">
     <div class="column is-one-fifth">
       <div class="mb-2">
-        <a class="button is-medium" style="border-radius: 20px" @click="() => {test(null);}">
+        <a class="button is-medium" id="composeButton" style="border-radius: 20px">
           <span class="icon">
             <i class="fa fa-edit"></i>
           </span>
@@ -112,6 +119,45 @@
           <!-- Add more email rows here -->
         </tbody>
       </table>
+      <section class="section" id="modal" style="display: none;">
+        <div class="container">
+          <div class="compose-form">
+            <div class="box">
+              <form>
+                <div class="field is-small">
+                  <label class="label">To:</label>
+                  <div class="control">
+                    <input class="input" id="address" name="emailAddress" type="email" placeholder="Enter recipient email" required>
+                  </div>
+                </div>
+    
+                <div class="field is-small">
+                  <label class="label">Subject:</label>
+                  <div class="control">
+                    <input class="input" id="subject" name="emailSubject" type="text" placeholder="Enter email subject" required>
+                  </div>
+                </div>
+    
+                <div class="field is-large">
+                  <label class="label">Message:</label>
+                  <div class="control">
+                    <textarea class="textarea" id="emailContent" name="content" placeholder="Enter email message" required></textarea>
+                  </div>
+                </div>
+    
+                <div class="field is-grouped">
+                  <div class="control">
+                    <button class="button is-primary" id="sendButton" type="button">Send</button>
+                  </div>
+                  <div class="control">
+                    <button class="button is-light" type="reset">Cancel</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
     <div class="is-four-fifths pb-6" v-if="mailOption === 1" style="background-color: white;">
       <div class="container pt-3 px-5">

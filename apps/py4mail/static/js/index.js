@@ -75,23 +75,23 @@ let init = (app) => {
       app.vue.mailOption = 1; //switch to individual mail
       app.vue.mail = email_id;
     },
-    test: function(arg) {
+    compose_mail: function(email) {
       console.log("Button clicked!!!");
-      console.log(arg);
-      let email = {};
-      email.receiver_mail = "test@gmail.com";
-      email.title = "This is the title";
-      email.content = "This is the content of the email";
       console.log(email);
-      axios
-      .post(get_compose_url, { email: email })
-      .then(function(response) {
-        if (response.data === "Mail sent successfully") {
-          app.methods.getInbox();
-        }      })
-      .catch(function(error) {
-        console.error(error);
-      });
+      // let email = {};
+      // email.receiver_mail = "test@gmail.com";
+      // email.title = "This is the title";
+      // email.content = "This is the content of the email";
+      // console.log(email);
+      // axios
+      // .post(get_compose_url, { email: email })
+      // .then(function(response) {
+      //   if (response.data === "Mail sent successfully") {
+      //     app.methods.getInbox();
+      //   }      })
+      // .catch(function(error) {
+      //   console.error(error);
+      // });
     }
   };
 
@@ -110,6 +110,32 @@ let init = (app) => {
 
   // Call to the initializer.
   app.init();
+
+  const composeButton = document.getElementById('composeButton');
+  const modal = document.getElementById('modal');
+  const receiver_mail = document.getElementById('address');
+  const title = document.getElementById('subject');
+  const emailContent = document.getElementById('emailContent');
+  const sendButton = document.getElementById('sendButton');
+  
+  composeButton.addEventListener('click', () => {
+    modal.style.display = 'block';
+  });
+  
+  sendButton.addEventListener('click', () => {
+    let email = {};
+    email.receiver_mail = receiver_mail.value;
+    email.title = title.value;
+    email.content = emailContent.value;
+    // Send the email using your preferred method or API
+    
+    // Reset the modal state
+    receiver_mail.value = '';
+    title.value = '';
+    emailContent.value = '';
+    modal.style.display = 'none';
+    app.methods.compose_mail(email);
+  });
 };
 
 // This takes the (empty) app object, and initializes it,
