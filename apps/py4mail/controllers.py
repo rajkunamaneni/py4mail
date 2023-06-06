@@ -108,6 +108,28 @@ def blocked():
 def compose_mail():
     email = request.json.get('email')
     # email = {receiver_mail: 'test@gmail.com', title: 'This is the title', content: 'This is the content of the email'}
-    print(email)
+
+    # Extract email fields
+    receiver_mail = email.get('receiver_mail')
+    title = email.get('title')
+    content = email.get('content')
+
+    # Get sender and receiver user objects
+    sender = auth.get_user()
+    sender_id = sender.id if sender else None
+
+    receiver = db(db.auth_user.email == receiver_mail).select().first()
+    receiver_id = receiver.id if receiver else None
+
+    # Insert the email data into the database
+    db.emails.insert(
+        sender_id=sender_id,
+        receiver_id=receiver_id,
+        title=title,
+        message=content,
+        sent_at=datetime.datetime.now(),
+        isStarred=False,
+        isTrash=False
+    )
+
     return "Mail sent successfully"
-    
