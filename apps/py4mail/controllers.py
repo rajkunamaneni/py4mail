@@ -16,7 +16,9 @@ def index():
     return dict(get_emails_url = URL('get_emails'),
                 trash_url = URL('move_to_trash'),
                 delete_url = URL('delete'),
-                star_url = URL('star'),)
+                star_url = URL('star'),
+                get_sent_url = URL('get_sent'),
+                get_compose_url = URL('compose_mail'))
 
 @action("get_emails")
 @action.uses(db, auth.user)
@@ -32,7 +34,7 @@ def get_emails():
     receiver_info = db.auth_user[auth.user_id]
     receiver_name = f"{receiver_info.first_name} {receiver_info.last_name}"
 
-    # Update emails list with sender and receiver names, and elapsed time
+    # Add sender, receiver names, and elapsed time to the list
     for email in emails:
         email['sender_name'] = sender_names.get(email['sender_id'])
         email['receiver_name'] = receiver_name
@@ -61,6 +63,26 @@ def get_elapsed_time(created_on):
         elapsed_time = created_on.strftime("%B %d")
 
     return elapsed_time
+
+@action("get_sent")
+@action.uses(db, auth.user)
+def get_sent():
+    emails = db(db.emails.sender_id == auth.user_id).select().as_list()
+    # Retrieve sender names from auth_user table
+    receiver_ids = [email['receiver_id'] for email in emails]
+    receiver_info = db(db.auth_user.id.belongs(receiver_ids)).select()
+    receiver_names = {receiver.id: f"{receiver.first_name} {receiver.last_name}" for receiver in receiver_info}
+
+    # Retrieve receiver name from auth_user table
+    sender_info = db.auth_user[auth.user_id]
+    sender_name = f"{sender_info.first_name} {sender_info.last_name}"
+
+    # Add sender, receiver names, and elapsed time to the list
+    for email in emails:
+        email['receiver_name'] = receiver_names.get(email['receiver_id'])
+        email['sender_name'] = sender_name
+        email['elapsed_time'] = get_elapsed_time(email['sent_at'])
+    return dict(emails=emails)
 
 @action("move_to_trash", method="POST")
 @action.uses(db, auth.user)
