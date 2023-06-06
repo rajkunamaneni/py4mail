@@ -4,11 +4,13 @@ let init = (app) => {
   // This is the Vue data.
   app.data = {
     emails: [],
+    emails_as_dict: {},
     mailOption: 0, // 0 = list, 1 = individual mail
     mail: {}
   };
 
   app.enumerate = (a) => {
+    // This adds an _idx field to each element of the array.
     let k = 0;
     a.map((e) => {
       e._idx = k++;
@@ -69,7 +71,7 @@ let init = (app) => {
       console.log(email);
       // use the api to send the email
       axios
-      .post(get_compose_url, { email: email })
+      .post(get_compose_url, { email: { receiver_mail: email.receiver_mail, title: email.title, content: email.content } })
       .then(function(response) {
         if (response.data === "Mail sent successfully") {
           app.methods.getInbox();
@@ -78,7 +80,51 @@ let init = (app) => {
       .catch(function(error) {
         console.error(error);
       });
-    }
+    },
+    // trash or delete the email
+    trashOrDeleteMail: function(email_id) {
+      app.vue.emails.forEach(function(email){
+        if (email.id === email_id) {
+          if (email.isTrash === true) {
+            axios.post(delete_url,
+              {
+                id: email.id,
+              }).then(function(response) {
+                app.vue.emails.splice(app.vue.emails.indexOf(email), 1);
+                delete app.vue.emails_as_dict[email];
+              });
+          } else {
+            axios.post(trash_url,
+              {
+                id: email.id,
+              }).then(function(response) {
+                app.vue.emails.indexOf(email).isTrash = true;
+              });
+          }
+        }
+
+      });
+      
+    },
+    starMail: function(email_id) {
+      axios.post(star_url,
+        {
+          id: email_id,
+        }).then(function(response) {
+          app.vue.emails.forEach(function(email){
+            if (email.id === email_id) {
+              new_email = email;
+              if (email.isStarred === true) {
+                new_email.isStarred = false;
+              } else {
+                new_email.isStarred = true;
+              }
+              app.vue.emails.splice(app.vue.emails.indexOf(email), 1);
+              app.vue.emails.push(new_email);
+            }
+          });
+        });
+    },
   };
 
   // This creates the Vue instance.
@@ -96,7 +142,7 @@ let init = (app) => {
 
   // Call to the initializer.
   app.init();
-
+  
   const composeButton = document.getElementById('composeButton');
   const modal = document.getElementById('modal');
   const receiver_mail = document.getElementById('address');
@@ -131,7 +177,6 @@ let init = (app) => {
     emailContent.value = '';
     modal.style.display = 'none';   // hide the form
   });
-
 };
 
 // This takes the (empty) app object, and initializes it,

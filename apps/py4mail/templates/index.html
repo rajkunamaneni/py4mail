@@ -104,7 +104,7 @@
                   <input type="checkbox">
                 </label>
                 <span class="icon checkbox">
-                  <i class="fa fa-star"  :style="{ color: email.isStarred ? 'yellow' : '#e3e3e3' }"></i>
+                  <i class="fa fa-star"  :style="{ color: email.isStarred ? 'yellow' : '#e3e3e3' }" @click="starMail(email.id)"></i>
                   <!-- <i class="fa fa-star"  style="color: yellow"></i> -->
                 </span>
               </span>
@@ -113,8 +113,8 @@
               <span v-if="mailOption === 0">{{email.sender_name}}</span>
               <span v-if="mailOption === 2">To: {{email.receiver_name}}</span>
             </td>
-            <td style="width: 50rem"  @click="() => {viewMail(email);}">{{email.message}}</td>
-            <td style="width: 8rem"  @click="() => {viewMail(email);}">{{email.elapsed_time}}</td>
+            <td style="width: 50rem" @click="() => {viewMail(email);}">{{email.title}}</td>
+            <td style="width: 8rem" @click="() => {viewMail(email);}">{{email.elapsed_time}}</td>
           </tr>
           <!-- Add more email rows here -->
         </tbody>
@@ -192,7 +192,7 @@
                 <!-- <i class="fa fa-star" style="color: yellow;"></i> -->
               </span>
               <span class="mt-1 icon">
-                <i class="fa fa-trash" style="color: #c64524;"></i>
+                <i class="fa fa-trash" style="color: #c64524;" @click="trashOrDeleteMail(mail.id)"></i>
               </span>
               <span style="font-size: 13px">{{ mail.sent_at }}</span>
             </td>
@@ -210,6 +210,9 @@
 <!-- Loads the index-specific js for Vue -->
 <script>
   let get_emails_url = "[[=XML(get_emails_url)]]";
+  let trash_url = "[[=XML(trash_url)]]";
+  let delete_url = "[[=XML(delete_url)]]";
+  let star_url = "[[=XML(star_url)]]";
   let get_sent_url = "[[=XML(get_sent_url)]]";
   let get_compose_url = "[[=XML(get_compose_url)]]";
 </script>

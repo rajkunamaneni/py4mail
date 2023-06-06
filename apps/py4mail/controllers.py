@@ -7,14 +7,18 @@ from yatl.helpers import A
 from .common import db, session, T, cache, auth, logger, authenticated, unauthenticated, flash
 from py4web.utils.url_signer import URLSigner
 from .models import get_username
-from py4web.utils.form import Form, FormStyleBulma
 
-url_signer = URLSigner(session)
+# url_signer = URLSigner(session)
 
 @action('index')
 @action.uses('index.html', db, auth.user)
 def index():
-    return dict(get_emails_url = URL('get_emails'), get_sent_url = URL('get_sent'), get_compose_url = URL('compose_mail'))
+    return dict(get_emails_url = URL('get_emails'),
+                trash_url = URL('move_to_trash'),
+                delete_url = URL('delete'),
+                star_url = URL('star'),
+                get_sent_url = URL('get_sent'),
+                get_compose_url = URL('compose_mail'))
 
 @action("get_emails")
 @action.uses(db, auth.user)
@@ -30,31 +34,10 @@ def get_emails():
     receiver_info = db.auth_user[auth.user_id]
     receiver_name = f"{receiver_info.first_name} {receiver_info.last_name}"
 
-    # Update emails list with sender and receiver names, and elapsed time
+    # Add sender, receiver names, and elapsed time to the list
     for email in emails:
         email['sender_name'] = sender_names.get(email['sender_id'])
         email['receiver_name'] = receiver_name
-        email['elapsed_time'] = get_elapsed_time(email['sent_at'])
-    return dict(emails=emails)
-
-#still under works
-@action("get_sent")
-@action.uses(db, auth.user)
-def get_sent():
-    emails = db(db.emails.sender_id == auth.user_id).select().as_list()
-    # Retrieve sender names from auth_user table
-    receiver_ids = [email['receiver_id'] for email in emails]
-    receiver_info = db(db.auth_user.id.belongs(receiver_ids)).select()
-    receiver_names = {receiver.id: f"{receiver.first_name} {receiver.last_name}" for receiver in receiver_info}
-
-    # Retrieve receiver name from auth_user table
-    sender_info = db.auth_user[auth.user_id]
-    sender_name = f"{sender_info.first_name} {sender_info.last_name}"
-
-    # Update emails list with sender and receiver names, and elapsed time
-    for email in emails:
-        email['receiver_name'] = receiver_names.get(email['receiver_id'])
-        email['sender_name'] = sender_name
         email['elapsed_time'] = get_elapsed_time(email['sent_at'])
     return dict(emails=emails)
 
@@ -80,19 +63,58 @@ def get_elapsed_time(created_on):
 
     return elapsed_time
 
-@action("move_to_trash")
+@action("get_sent")
+@action.uses(db, auth.user)
+def get_sent():
+    emails = db(db.emails.sender_id == auth.user_id).select().as_list()
+    # Retrieve sender names from auth_user table
+    receiver_ids = [email['receiver_id'] for email in emails]
+    receiver_info = db(db.auth_user.id.belongs(receiver_ids)).select()
+    receiver_names = {receiver.id: f"{receiver.first_name} {receiver.last_name}" for receiver in receiver_info}
+
+    # Retrieve receiver name from auth_user table
+    sender_info = db.auth_user[auth.user_id]
+    sender_name = f"{sender_info.first_name} {sender_info.last_name}"
+
+    # Add sender, receiver names, and elapsed time to the list
+    for email in emails:
+        email['receiver_name'] = receiver_names.get(email['receiver_id'])
+        email['sender_name'] = sender_name
+        email['elapsed_time'] = get_elapsed_time(email['sent_at'])
+    return dict(emails=emails)
+
+@action("move_to_trash", method="POST")
 @action.uses(db, auth.user)
 def move_to_trash():
     mail_id = request.json.get('id')
     email = db.emails(mail_id)
     email.update_record(isTrash=True)
+    return dict(mail_id=mail_id,)
 
-@action("delete")
+
+@action("delete", method="POST")
 @action.uses(db, auth.user)
 def delete():
-    pass
+    mail_id = request.json.get('id')
+    db(db.emails.id == mail_id).delete()
+    return dict(mail_id=mail_id,)
+
+@action("star", method="POST")
+@action.uses(db, auth.user)
+def star():
+    starred = False
+    mail_id = request.json.get('id')
+    email = db.emails(mail_id)
+    if email.isStarred == True:
+        email.update_record(isStarred=False)
+    else:
+        email.update_record(isStarred = True)
+        starred = True
+    return dict(mail_id = mail_id,
+                starred = starred)
+
     
-@action("blocked")
+@action("blocked", method="POST")
 @action.uses(db, auth.user)
 def blocked():
     data = request.json
@@ -102,34 +124,3 @@ def blocked():
         block_user.delete_record(db.blocked[0]['id'])
     else:
         db.blocked.insert(created_by=auth.user_id, blocked_id=user_id)
-
-@action('compose_mail', method=['GET', 'POST'])
-@action.uses(url_signer, db, session, auth.user)
-def compose_mail():
-    email = request.json.get('email')
-    # email = {receiver_mail: 'test@gmail.com', title: 'This is the title', content: 'This is the content of the email'}
-    print('This is the email', email)
-    # Extract email fields
-    receiver_mail = email.get('receiver_mail')
-    title = email.get('title')
-    content = email.get('content')
-
-    # Get sender and receiver user objects
-    sender = auth.get_user()
-    sender_id = sender.id if sender else None
-
-    receiver = db(db.auth_user.email == receiver_mail).select().first()
-    receiver_id = receiver.id if receiver else None
-
-    # Insert the email data into the database
-    db.emails.insert(
-        sender_id=sender_id,
-        receiver_id=receiver_id,
-        title=title,
-        message=content,
-        sent_at=datetime.datetime.now(),
-        isStarred=False,
-        isTrash=False
-    )
-
-    return "Mail sent successfully"
