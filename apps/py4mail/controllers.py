@@ -108,7 +108,7 @@ def blocked():
 def compose_mail():
     email = request.json.get('email')
     # email = {receiver_mail: 'test@gmail.com', title: 'This is the title', content: 'This is the content of the email'}
-
+    print('This is the email', email)
     # Extract email fields
     receiver_mail = email.get('receiver_mail')
     title = email.get('title')
