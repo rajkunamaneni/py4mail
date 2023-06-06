@@ -18,17 +18,28 @@
     cursor: pointer;
   }
 
-#back:hover {
-  background-color: #f5f5f5;
+.fa:hover {
+  cursor: pointer;
 }
 
+#back:hover {
+  background-color: rgb(239, 239, 239);
+}
+
+.compose-form {
+    position: fixed;
+    bottom: 10px;
+    right: 30px;
+    width: 500px;
+  }
+
 </style>
-<div class="section mt-0" id="vue-target" v-cloak>
+<div class="section mt-0" id="vue-target" v-cloak style="background-color: #f5f4f4;">
   <!-- Put your Vue.js template here -->
   <div class="columns">
     <div class="column is-one-fifth">
       <div class="mb-2">
-        <a class="button is-medium" style="border-radius: 20px">
+        <a class="button is-medium" id="composeButton" style="border-radius: 20px">
           <span class="icon">
             <i class="fa fa-edit"></i>
           </span>
@@ -51,13 +62,13 @@
               </span>
               <span>Starred</span></a></li>
           </div>
-          <!-- <div>
+          <div>
             <li><a style="border-radius: 20px" @click="getSent">
               <span class="icon">
                 <i class="fa fa-paper-plane" style="color: #ababab;"></i>
               </span>
               <span>Sent</span></a></li>
-          </div> -->
+          </div>
           <div>
             <li><a style="border-radius: 20px" @click="getTrash">
               <span class="icon">
@@ -86,27 +97,73 @@
       </div>
       <table class="table table-first is-narrow is-fullwidth">
         <tbody>
-          <tr class="field has-addons my-0 pt-2" v-for="email in emails" :key="email.id" class="email" @click="() => {viewMail(email);}" >
-            <td style="width: 13rem">
+          <tr class="field has-addons my-0 pt-2" v-for="email in emails" :key="email.id" class="email">
+            <td style="width: 4rem">
               <span>
                 <label class="checkbox mt-1 mr-1">
                   <input type="checkbox">
                 </label>
                 <span class="icon checkbox">
-                  <button class="fa fa-star"  :style="{ color: email.isStarred ? 'yellow' : '#e3e3e3' }" @click="starMail(email.id)"></button>
+                  <i class="fa fa-star"  :style="{ color: email.isStarred ? 'yellow' : '#e3e3e3' }" @click="starMail(email.id)"></i>
                   <!-- <i class="fa fa-star"  style="color: yellow"></i> -->
                 </span>
-                <span>{{email.sender_name}}</span>
               </span>
             </td>
-            <td style="width: 50rem">{{email.title}}</td>
-            <td style="width: 8rem">{{email.elapsed_time}}</td>
+            <td style="width: 10rem" @click="() => {viewMail(email);}">
+              <span v-if="mailOption === 0">{{email.sender_name}}</span>
+              <span v-if="mailOption === 2">To: {{email.receiver_name}}</span>
+            </td>
+            <td style="width: 50rem" @click="() => {viewMail(email);}">{{email.title}}</td>
+            <td style="width: 8rem" @click="() => {viewMail(email);}">{{email.elapsed_time}}</td>
           </tr>
           <!-- Add more email rows here -->
         </tbody>
       </table>
+      <section class="section" id="modal" style="display: none;">
+        <div class="container">
+          <div class="compose-form">
+            <div class="control is-pulled-right">
+              <button class="button is-danger is-small" id="closeMail">
+                <span class="icon is-small">
+                  <i class="fa fa-close"></i>
+                </span>
+              </button>
+            </div>
+            <div class="box">
+              <form>
+                <div class="field is-small">
+                  <label class="label">To:</label>
+                  <div class="control">
+                    <input class="input" id="address" name="emailAddress" type="email" placeholder="Enter recipient email" required>
+                  </div>
+                </div>
+    
+                <div class="field is-small">
+                  <label class="label">Subject:</label>
+                  <div class="control">
+                    <input class="input" id="subject" name="emailSubject" type="text" placeholder="Enter email subject" required>
+                  </div>
+                </div>
+    
+                <div class="field is-large">
+                  <label class="label">Message:</label>
+                  <div class="control">
+                    <textarea class="textarea" id="emailContent" name="content" placeholder="Enter email message" required></textarea>
+                  </div>
+                </div>
+    
+                <div class="field is-grouped">
+                  <div class="control">
+                    <button class="button is-primary" id="sendButton" type="button">Send</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
-    <div class="is-four-fifths" v-if="mailOption === 1">
+    <div class="is-four-fifths pb-6" v-if="mailOption === 1" style="background-color: white;">
       <div class="container pt-3 px-5">
         <div class="mb-2">
           <button class="button" style="border: none;" @click="getInbox">
@@ -131,17 +188,17 @@
             </td>
             <td>
               <span class="mt-1 icon">
-                <button class="fa fa-star" :style="{ color: mail.isStarred ? 'yellow' : '#e3e3e3' }"></button>
+                <i class="fa fa-star" :style="{ color: mail.isStarred ? 'yellow' : '#e3e3e3' }"></i>
                 <!-- <i class="fa fa-star" style="color: yellow;"></i> -->
               </span>
               <span class="mt-1 icon">
-                <button class="fa fa-trash" style="color: #c64524;" @click="trashOrDeleteMail(mail.id)"></button>
+                <i class="fa fa-trash" style="color: #c64524;" @click="trashOrDeleteMail(mail.id)"></i>
               </span>
               <span style="font-size: 13px">{{ mail.sent_at }}</span>
             </td>
           </tr>
         </table>
-        <div class="ml-6 mt-4">
+        <div class="ml-6 mt-4 mb-6 pb-6">
           {{mail.message}}
         </div>
       </div>
@@ -156,6 +213,8 @@
   let trash_url = "[[=XML(trash_url)]]";
   let delete_url = "[[=XML(delete_url)]]";
   let star_url = "[[=XML(star_url)]]";
+  let get_sent_url = "[[=XML(get_sent_url)]]";
+  let get_compose_url = "[[=XML(get_compose_url)]]";
 </script>
 <script src="js/vue.js"></script>
 <script src="js/axios.min.js"></script>
