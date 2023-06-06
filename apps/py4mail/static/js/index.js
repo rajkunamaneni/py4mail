@@ -1,20 +1,14 @@
-// This will be the object that will contain the Vue attributes
-// and be used to initialize it.
 let app = {};
 
-// Given an empty app object, initializes it filling its attributes,
-// creates a Vue instance, and then initializes the Vue instance.
 let init = (app) => {
   // This is the Vue data.
   app.data = {
     emails: [],
-    emails_as_dict: {},
     mailOption: 0, // 0 = list, 1 = individual mail
     mail: {}
   };
 
   app.enumerate = (a) => {
-    // This adds an _idx field to each element of the array.
     let k = 0;
     a.map((e) => {
       e._idx = k++;
@@ -35,10 +29,8 @@ let init = (app) => {
     getGlobal: function(type, isType) {
       app.vue.mailOption = 0;
       axios.get(get_emails_url).then(function(response) {
-        app.data.emails_as_dict = {};
         app.vue.emails = app.enumerate(response.data.emails).filter(function(email) {
           if (email[isType] === type) {
-            app.data.emails_as_dict[email.id] = email;
             return true;
           }
           return false;
@@ -54,7 +46,6 @@ let init = (app) => {
     getSent: function() {
       app.vue.mailOption = 2;
       axios.get(get_sent_url).then(function(response) {
-        app.data.emails_as_dict = {};
         app.vue.emails = app.enumerate(response.data.emails);
         app.methods.formatEmailsByTime();
       });
@@ -71,27 +62,22 @@ let init = (app) => {
 
     // view individual mail 
     viewMail: function(email_id) {
-      console.log(email_id);
       app.vue.mailOption = 1; //switch to individual mail
       app.vue.mail = email_id;
     },
     compose_mail: function(email) {
-      console.log("Button clicked!!!");
       console.log(email);
-      // let email = {};
-      // email.receiver_mail = "test@gmail.com";
-      // email.title = "This is the title";
-      // email.content = "This is the content of the email";
-      // console.log(email);
-      // axios
-      // .post(get_compose_url, { email: email })
-      // .then(function(response) {
-      //   if (response.data === "Mail sent successfully") {
-      //     app.methods.getInbox();
-      //   }      })
-      // .catch(function(error) {
-      //   console.error(error);
-      // });
+      // use the api to send the email
+      axios
+      .post(get_compose_url, { email: email })
+      .then(function(response) {
+        if (response.data === "Mail sent successfully") {
+          app.methods.getInbox();
+        }      
+      })
+      .catch(function(error) {
+        console.error(error);
+      });
     }
   };
 
@@ -118,24 +104,34 @@ let init = (app) => {
   const emailContent = document.getElementById('emailContent');
   const sendButton = document.getElementById('sendButton');
   
+  // show the email form
   composeButton.addEventListener('click', () => {
-    modal.style.display = 'block';
+    modal.style.display = 'block';  // show the form
   });
-  
+  // call compose_email to send the email
   sendButton.addEventListener('click', () => {
+    // get the content for the email
     let email = {};
     email.receiver_mail = receiver_mail.value;
     email.title = title.value;
     email.content = emailContent.value;
-    // Send the email using your preferred method or API
-    
-    // Reset the modal state
+
+    // Reset the fields
     receiver_mail.value = '';
     title.value = '';
     emailContent.value = '';
-    modal.style.display = 'none';
+    modal.style.display = 'none'; // hide the form
     app.methods.compose_mail(email);
   });
+
+  closeMail.addEventListener('click', () => {
+    // reset the field
+    receiver_mail.value = '';
+    title.value = '';
+    emailContent.value = '';
+    modal.style.display = 'none';   // hide the form
+  });
+
 };
 
 // This takes the (empty) app object, and initializes it,

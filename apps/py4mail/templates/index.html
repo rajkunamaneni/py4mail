@@ -23,7 +23,7 @@
 }
 
 #back:hover {
-  background-color: #f5f5f5;
+  background-color: rgb(239, 239, 239);
 }
 
 .compose-form {
@@ -122,6 +122,13 @@
       <section class="section" id="modal" style="display: none;">
         <div class="container">
           <div class="compose-form">
+            <div class="control is-pulled-right">
+              <button class="button is-danger is-small" id="closeMail">
+                <span class="icon is-small">
+                  <i class="fa fa-close"></i>
+                </span>
+              </button>
+            </div>
             <div class="box">
               <form>
                 <div class="field is-small">
@@ -148,9 +155,6 @@
                 <div class="field is-grouped">
                   <div class="control">
                     <button class="button is-primary" id="sendButton" type="button">Send</button>
-                  </div>
-                  <div class="control">
-                    <button class="button is-light" type="reset">Cancel</button>
                   </div>
                 </div>
               </form>
