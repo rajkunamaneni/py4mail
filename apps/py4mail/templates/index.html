@@ -145,8 +145,8 @@
       <div class="container pt-3 px-5">
         <div class="mb-2">
           <button class="button" style="border: none;" @click="getMailbox">
-            <span>
-              <-
+            <span class="icon">
+              <i class="fa fa-arrow-left"></i>
             </span>
           </button>
         </div>
@@ -177,6 +177,9 @@
               <i class="fa fa-star" :style="{ color: mail.isStarred ? 'yellow' : '#e3e3e3' }" @click="starMail(mail.id)"></i>
               <!-- <i class="fa fa-star" style="color: yellow;"></i> -->
             </span>
+            <span class="mt-1 icon checkbox">
+              <i class="fa fa-ban" style="color: #ababab;" @click="blockEmail(email.id)"></i>
+            </span><!-- This is the Block Button  -->
             <span class="mt-1 icon icn mr-2" data-name="Delete">
               <i class="fa fa-trash" style="color: #c64524;" @click="trashOrDeleteMail(mail.id)"></i>
             </span>
