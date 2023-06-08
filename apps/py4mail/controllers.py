@@ -131,20 +131,17 @@ def compose_mail():
 
     if email is None:
         return "Failure"
-    print("Ok is this gonna work", email);
-    # email = {receiver_mail: 'test@gmail.com', title: 'This is the title', content: 'This is the content of the email'}
-    print('This is the email', email)
     # # Extract email fields
     receiver_mail = email.get('receiver_mail')
     title = email.get('title')
     content = email.get('content')
-
+    
     # Get sender and receiver user objects
     sender = auth.get_user()
-    sender_id = sender.id if sender else None
+    sender_id = sender["id"] if sender else None
 
     receiver = db(db.auth_user.email == receiver_mail).select().first()
-    receiver_id = receiver.id if receiver else None
+    receiver_id = receiver["id"] if receiver else None
 
     # Insert the email data into the database
     db.emails.insert(

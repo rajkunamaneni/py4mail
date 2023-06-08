@@ -151,6 +151,7 @@ let init = (app) => {
           .post(get_compose_url, email)
           .then(function(response) {
             if (response.data === "Mail sent successfully") {
+              app.methods.getInbox();
               console.log("Success!!");
             } else {
               console.log("Noooo");
