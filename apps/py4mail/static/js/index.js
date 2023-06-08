@@ -123,14 +123,6 @@ let init = (app) => {
               } else {
                 email.isStarred = true;
               }
-              // new_email = email;
-              // if (email.isStarred === true) {
-              //   new_email.isStarred = false;
-              // } else {
-              //   new_email.isStarred = true;
-              // }
-              // app.vue.emails.splice(app.vue.emails.indexOf(email), 1);
-              // app.vue.emails.push(new_email);
             }
           });
         });
