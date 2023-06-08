@@ -11,6 +11,7 @@ let init = (app) => {
     emails_for_search: [],
     email_addresses: [],
     compose: 0,
+    formData: {address:'', subject:'', emailContent:''},
   };
 
   app.enumerate = (a) => {
@@ -75,13 +76,13 @@ let init = (app) => {
       app.vue.mail = email_id;
     },
     compose_mail: function(email) {
-      console.log(email);
       // use the api to send the email
       axios
       .post(get_compose_url, { email: { receiver_mail: email.receiver_mail, title: email.title, content: email.content } })
       .then(function(response) {
         if (response.data === "Mail sent successfully") {
-          app.methods.getInbox();
+          // app.methods.getInbox();
+          console.log("Success");
         }      
       })
       .catch(function(error) {
@@ -109,7 +110,6 @@ let init = (app) => {
               });
           }
         }
-
       });
     },
     starMail: function(email_id) {
@@ -133,8 +133,36 @@ let init = (app) => {
     },
     closeCompose: function() {
       app.vue.compose = 0;
-      console.log("Close compose Called!!");
+      app.vue.formData.address = '';
+      app.vue.formData.emailContent = '';
+      app.vue.formData.subject = '';
     },
+    sendMail() {
+      // Access the form data
+      if (!app.vue.email_addresses.includes(app.vue.formData.address)) {
+        window.alert("Not a valid email address");
+      } else {
+        const email = {
+          receiver_mail: app.vue.formData.address,
+          title: app.vue.formData.subject,
+          content: app.vue.formData.emailContent
+        };
+        axios
+          .post(get_compose_url, email)
+          .then(function(response) {
+            if (response.data === "Mail sent successfully") {
+              console.log("Success!!");
+            } else {
+              console.log("Noooo");
+            }
+          })
+          .catch(function(error) {
+            console.error(error);
+          });
+        app.methods.closeCompose();
+      }
+    }
+    
   };
 
   // This creates the Vue instance.
@@ -171,47 +199,6 @@ let init = (app) => {
 
   // Call to the initializer.
   app.init();
-  
-  // const composeButton = document.getElementById('composeButton');
-  const modal = document.getElementById('modal');
-  const receiver_mail = document.getElementById('address');
-  const title = document.getElementById('subject');
-  const emailContent = document.getElementById('emailContent');
-  const sendButton = document.getElementById('sendButton');
-  
-  // // show the email form
-  // composeButton.addEventListener('click', () => {
-  //   modal.style.display = 'block';  // show the form
-  // });
-  // call compose_email to send the email
-  sendButton.addEventListener('click', () => {
-    // get the content for the email
-    if (!app.vue.email_addresses.includes(receiver_mail.value)) {
-      window.alert("Not a valid email address");
-      receiver_mail.value = '';
-    } else {
-      let email = {};
-      email.receiver_mail = receiver_mail.value;
-      email.title = title.value;
-      email.content = emailContent.value;
-      // Reset the fields
-      receiver_mail.value = '';
-      title.value = '';
-      emailContent.value = '';
-      modal.style.display = 'none'; // hide the form
-      app.methods.compose_mail(email);
-      app.methods.closeCompose();
-    }
-  });
-
-  closeMail.addEventListener('click', () => {
-    // reset the field
-    receiver_mail.value = '';
-    title.value = '';
-    emailContent.value = '';
-    app.methods.closeCompose();
-    // modal.style.display = 'none';   // hide the form
-  });
 };
 
 // This takes the (empty) app object, and initializes it,

@@ -97,7 +97,7 @@
       <table class="table table-first is-narrow is-fullwidth">
         <tbody>
           <tr class="field has-addons my-0 pt-2" v-for="email in emails" :key="email.id" class="email">
-            <td style="width: 15rem" @click="() => {viewMail(email);}">
+            <td class="pl-4" style="width: 15rem" @click="() => {viewMail(email);}">
               <span v-if="mailOption === 0">{{email.sender_name}}</span>
               <span v-if="mailOption === 2">To: {{email.receiver_name}}</span>
             </td>
@@ -108,7 +108,7 @@
                 <span class="icon checkbox" v-if="email.isTrash !== true">
                   <i class="fa fa-star"  :style="{ color: email.isStarred ? 'yellow' : '#e3e3e3' }" @click="starMail(email.id)"></i>
                 </span>
-                <span class="mt-1 icon checkbox">
+                <span class="mt-1 icon">
                   <i class="fa fa-trash" style="color: #c64524;" @click="trashOrDeleteMail(mail.id)"></i>
                 </span>
               </span>
@@ -132,27 +132,28 @@
                 <div class="field is-small">
                   <label class="label">To:</label>
                   <div class="control">
-                    <input class="input" id="address" name="emailAddress" type="email" placeholder="Enter recipient email" required>
+                    <input class="input" v-model="formData.address" name="emailAddress" type="email" placeholder="Enter recipient email" required>
                   </div>
                 </div>
     
                 <div class="field is-small">
                   <label class="label">Subject:</label>
                   <div class="control">
-                    <input class="input" id="subject" name="emailSubject" type="text" placeholder="Enter email subject" required>
+                    <input class="input" v-model="formData.subject" name="emailSubject" type="text" placeholder="Enter email subject" required>
                   </div>
                 </div>
     
                 <div class="field is-large">
                   <label class="label">Message:</label>
                   <div class="control">
-                    <textarea class="textarea" id="emailContent" name="content" placeholder="Enter email message" required></textarea>
+                    <textarea class="textarea" v-model="formData.emailContent" name="content" placeholder="Enter email message" required></textarea>
                   </div>
                 </div>
     
                 <div class="field is-grouped">
                   <div class="control">
-                    <button class="button is-primary" id="sendButton" type="button">Send</button>
+                    <!-- <button class="button is-primary" id="sendButton" type="button" @click="sendMail">Send</button> -->
+                    <button class="button is-primary" type="submit" @click="sendMail">Submit</button>
                   </div>
                 </div>
               </form>
