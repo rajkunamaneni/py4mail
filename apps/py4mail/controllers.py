@@ -124,7 +124,7 @@ def blocked():
     else:
         db.blocked.insert(created_by=auth.user_id, blocked_id=user_id)
 
-@action('compose_mail', method=['GET', 'POST'])
+@action('compose_mail', method=['POST'])
 @action.uses(db, session, auth.user)
 def compose_mail():
     email = request.json
@@ -135,7 +135,7 @@ def compose_mail():
     receiver_mail = email.get('receiver_mail')
     title = email.get('title')
     content = email.get('content')
-    
+
     # Get sender and receiver user objects
     sender = auth.get_user()
     sender_id = sender["id"] if sender else None
