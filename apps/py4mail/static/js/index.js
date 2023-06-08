@@ -118,14 +118,19 @@ let init = (app) => {
         }).then(function(response) {
           app.vue.emails.forEach(function(email){
             if (email.id === email_id) {
-              new_email = email;
               if (email.isStarred === true) {
-                new_email.isStarred = false;
+                email.isStarred = false;
               } else {
-                new_email.isStarred = true;
+                email.isStarred = true;
               }
-              app.vue.emails.splice(app.vue.emails.indexOf(email), 1);
-              app.vue.emails.push(new_email);
+              // new_email = email;
+              // if (email.isStarred === true) {
+              //   new_email.isStarred = false;
+              // } else {
+              //   new_email.isStarred = true;
+              // }
+              // app.vue.emails.splice(app.vue.emails.indexOf(email), 1);
+              // app.vue.emails.push(new_email);
             }
           });
         });
