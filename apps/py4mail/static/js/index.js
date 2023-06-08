@@ -12,6 +12,7 @@ let init = (app) => {
     email_addresses: [],
     compose: 0,
     formData: {address:'', subject:'', emailContent:''},
+    currentMailbox: 'inbox',
   };
 
   app.enumerate = (a) => {
@@ -22,19 +23,17 @@ let init = (app) => {
     });
     return a;
   };
-  
 
   // This contains all the methods.
   app.methods = {
     formatEmailsByTime: function () {
-      app.vue.emails.sort(function (a, b) {
-        return new Date(b.sent_at) - new Date(a.sent_at);
-      });
+      app.vue.emails.sort((a, b) => new Date(b.sent_at) - new Date(a.sent_at));
     },
-
+    
     //One function that get the information for the three different types of mails
     //param of `type` to get the mails from inbox, trash, or starred
     getGlobal: function(type, isType) {
+      app.vue.emails = [];
       app.vue.mailOption = 0;
       app.data.emails_as_dict = {};
       axios.get(get_emails_url).then(function(response) {
@@ -48,28 +47,51 @@ let init = (app) => {
         app.methods.formatEmailsByTime();
       });
     },
-
+    getMailbox: function() {
+      let mailbox = app.vue.currentMailbox;
+      if (mailbox === "inbox") {
+        app.methods.getInbox();
+      }
+      else if (mailbox === "starred") {
+        app.methods.getStarred();
+      }
+      else if (mailbox === "sent") {
+        app.methods.getSent();
+      }
+      else if (mailbox === "trash") {
+        app.methods.getTrash();
+      }
+    },
     //get the mails from inbox
     getInbox: function() {
+      app.vue.currentMailbox = 'inbox';
       app.methods.getGlobal(false, 'isTrash');
     },    
     getSent: function() {
+      app.vue.currentMailbox = 'sent';
       app.vue.mailOption = 2;
       axios.get(get_sent_url).then(function(response) {
-        app.vue.emails = app.enumerate(response.data.emails);
+        app.vue.emails = app.enumerate(response.data.emails).filter(function(email){
+          if(email['isTrash'] !== true) {
+            return true;
+          } else {
+            return false;
+          }
+        });
         app.methods.formatEmailsByTime();
       });
     },
     //get the mails from trash
     getTrash: function() {
+      app.vue.currentMailbox = 'trash';
       app.methods.getGlobal(true, 'isTrash');
     },
 
     //get the mails from starred
     getStarred: function() { 
+      app.vue.currentMailbox = 'starred';
       app.methods.getGlobal(true, 'isStarred');
     },
-
     // view individual mail 
     viewMail: function(email_id) {
       app.vue.mailOption = 1; //switch to individual mail
@@ -100,13 +122,16 @@ let init = (app) => {
               }).then(function(response) {
                 app.vue.emails.splice(app.vue.emails.indexOf(email), 1);
                 delete app.vue.emails_as_dict[email];
+                app.methods.getMailbox();
               });
           } else {
             axios.post(trash_url,
               {
                 id: email.id,
               }).then(function(response) {
+                app.methods.starMail(email_id);
                 app.vue.emails.indexOf(email).isTrash = true;
+                app.methods.getMailbox();
               });
           }
         }
@@ -137,6 +162,29 @@ let init = (app) => {
       app.vue.formData.emailContent = '';
       app.vue.formData.subject = '';
     },
+    replyMail: function(email) {
+      if (!email.title.startsWith("Re:")) {
+        app.vue.formData.subject = 'Re: ' + email.title;
+      } else {
+        app.vue.formData.subject = email.title;
+      }
+      app.vue.formData.address = email.sender_email;
+      app.methods.openCompose();
+    },
+    forwardMail: function(email) {
+      console.log(email);
+      if (!email.title.startsWith("Fwd:")) {
+        app.vue.formData.subject = 'Fwd: ' + email.title;
+      } else {
+        app.vue.formData.subject = email.title;
+      }
+      app.vue.formData.emailContent = email.message;
+      app.methods.openCompose();
+    },
+    setcurrentMailbox: function(mailbox) {
+      app.vue.currentMailbox = mailbox;
+      app.methods.getMailbox();
+    },
     sendMail() {
       // Access the form data
       if (!app.vue.email_addresses.includes(app.vue.formData.address)) {
@@ -151,7 +199,7 @@ let init = (app) => {
           .post(get_compose_url, email)
           .then(function(response) {
             if (response.data === "Mail sent successfully") {
-              app.methods.getInbox();
+              app.methods.getMailbox();
               console.log("Success!!");
             } else {
               console.log("Noooo");
@@ -163,7 +211,6 @@ let init = (app) => {
         app.methods.closeCompose();
       }
     }
-    
   };
 
   // This creates the Vue instance.
@@ -195,7 +242,7 @@ let init = (app) => {
         app.vue.email_addresses.push(user.email);
       });
     })
-    app.methods.getInbox();
+    app.methods.getMailbox();
   };
 
   // Call to the initializer.
