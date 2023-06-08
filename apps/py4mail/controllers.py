@@ -38,7 +38,6 @@ def get_emails():
         email['sender_name'] = sender_names.get(email['sender_id'])
         email['receiver_name'] = receiver_name
         email['elapsed_time'] = get_elapsed_time(email['sent_at'])
-    print(emails)
     return dict(emails=emails)
 
 def get_elapsed_time(created_on):
@@ -128,10 +127,14 @@ def blocked():
 @action('compose_mail', method=['GET', 'POST'])
 @action.uses(db, session, auth.user)
 def compose_mail():
-    email = request.json.get('email')
+    email = request.json
+
+    if email is None:
+        return "Failure"
+    print("Ok is this gonna work", email);
     # email = {receiver_mail: 'test@gmail.com', title: 'This is the title', content: 'This is the content of the email'}
     print('This is the email', email)
-    # Extract email fields
+    # # Extract email fields
     receiver_mail = email.get('receiver_mail')
     title = email.get('title')
     content = email.get('content')
@@ -153,7 +156,6 @@ def compose_mail():
         isStarred=False,
         isTrash=False
     )
-
     return "Mail sent successfully"
 
 @action("get_users")
