@@ -32,6 +32,28 @@
     right: 30px;
     width: 500px;
   }
+  .icn {
+    position: relative;
+    display: inline-block;
+  }
+
+  .icn:hover::after {
+    content: attr(data-name);
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #818181;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+.is-active{
+  color: #ababab;
+}
 
 </style>
 <div class="section mt-0" id="vue-target" v-cloak style="background-color: #f5f4f4;">
@@ -49,28 +71,29 @@
       <aside class="menu">
         <ul class="menu-list">
           <div>
-            <li><a style="border-radius: 20px" @click="getInbox">
+            <li><a style="border-radius: 20px" @click="setcurrentMailbox('inbox')" :class="{ 'is-active': currentMailbox === 'inbox' }">
               <span class="icon">
-                <i class="fa fa-inbox" style="color: #1d76c9;"></i>
+                <!-- <i class="fa fa-inbox" style="color: #1d76c9;"></i> -->
+                <i class="fa fa-inbox"></i>
               </span>
               <span>Inbox</span></a></li>
           </div>
           <div>
-            <li><a style="border-radius: 20px" @click="getStarred">
+            <li><a style="border-radius: 20px" @click="setcurrentMailbox('starred')" :class="{ 'is-active': currentMailbox === 'starred' }">
               <span class="icon">
                 <i class="fa fa-star" style="color: yellow;"></i>
               </span>
               <span>Starred</span></a></li>
           </div>
           <div>
-            <li><a style="border-radius: 20px" @click="getSent">
+            <li><a style="border-radius: 20px" @click="setcurrentMailbox('sent')" :class="{ 'is-active': currentMailbox === 'sent' }">
               <span class="icon">
                 <i class="fa fa-paper-plane" style="color: #ababab;"></i>
               </span>
               <span>Sent</span></a></li>
           </div>
           <div>
-            <li><a style="border-radius: 20px" @click="getTrash">
+            <li><a style="border-radius: 20px" @click="setcurrentMailbox('trash')" :class="{ 'is-active': currentMailbox === 'trash' }">
               <span class="icon">
                 <i class="fa fa-trash" style="color: #c64524;"></i>
               </span>
@@ -105,11 +128,11 @@
             <td style="width: 8rem"  @click="() => {viewMail(email);}">{{email.elapsed_time}}</td>
             <td style="width: 5rem">
               <span>
-                <span class="icon checkbox" v-if="email.isTrash !== true">
-                  <i class="fa fa-star"  :style="{ color: email.isStarred ? 'yellow' : '#e3e3e3' }" @click="starMail(email.id)"></i>
+                <span class="icon checkbox" v-if="email.isTrash !== true" @click="starMail(email.id)">
+                  <i class="fa fa-star"  :style="{ color: email.isStarred ? 'yellow' : '#e3e3e3' }"></i>
                 </span>
-                <span class="mt-1 icon">
-                  <i class="fa fa-trash" style="color: #c64524;" @click="trashOrDeleteMail(mail.id)"></i>
+                <span class="mt-1 icon" @click="trashOrDeleteMail(email.id)">
+                  <i class="fa fa-trash" style="color: #c64524;"></i>
                 </span>
               </span>
             </td>
@@ -117,55 +140,11 @@
           <!-- Add more email rows here -->
         </tbody>
       </table>
-      <section class="section" id="modal" v-if="compose === 1">
-        <div class="container">
-          <div class="compose-form">
-            <div class="control is-pulled-right">
-              <button class="button is-danger is-small" id="closeMail" @click="closeCompose">
-                <span class="icon is-small">
-                  <i class="fa fa-close"></i>
-                </span>
-              </button>
-            </div>
-            <div class="box">
-              <form>
-                <div class="field is-small">
-                  <label class="label">To:</label>
-                  <div class="control">
-                    <input class="input" v-model="formData.address" name="emailAddress" type="email" placeholder="Enter recipient email" required>
-                  </div>
-                </div>
-    
-                <div class="field is-small">
-                  <label class="label">Subject:</label>
-                  <div class="control">
-                    <input class="input" v-model="formData.subject" name="emailSubject" type="text" placeholder="Enter email subject" required>
-                  </div>
-                </div>
-    
-                <div class="field is-large">
-                  <label class="label">Message:</label>
-                  <div class="control">
-                    <textarea class="textarea" v-model="formData.emailContent" name="content" placeholder="Enter email message" required></textarea>
-                  </div>
-                </div>
-    
-                <div class="field is-grouped">
-                  <div class="control">
-                    <!-- <button class="button is-primary" id="sendButton" type="button" @click="sendMail">Send</button> -->
-                    <button class="button is-primary" type="submit" @click="sendMail">Submit</button>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
     <div class="is-four-fifths pb-6" v-if="mailOption === 1" style="background-color: white;">
       <div class="container pt-3 px-5">
         <div class="mb-2">
-          <button class="button" style="border: none;" @click="getInbox">
+          <button class="button" style="border: none;" @click="getMailbox">
             <span>
               <-
             </span>
@@ -174,35 +153,88 @@
         <div class="ml-6 mb-3 pt-5 pb-4">
           <p style="font-size: 25px;">{{mail.title}}</h1>
         </div>
-        <table>
-          <tr>
-            <td class="mt-2">
-              <span class="icon is-large">
-                <i class="fa fa-user fa-2x"></i>
-              </span>
-            </td>
-            <td style="width: 40rem">
-              <p class="mt-1" style="font-size: 13px;"><strong>{{mail.sender_name}}</strong></p>
-              <p class="mt-0" style="font-size: 13px;">{{mail.receiver_name}}</p>
-            </td>
-            <td>
-              <span class="mt-1 icon">
-                <i class="fa fa-star" :style="{ color: mail.isStarred ? 'yellow' : '#e3e3e3' }"></i>
-                <!-- <i class="fa fa-star" style="color: yellow;"></i> -->
-              </span>
-              <span class="mt-1 icon">
-                <i class="fa fa-trash" style="color: #c64524;" @click="trashOrDeleteMail(mail.id)"></i>
-              </span>
-              <span style="font-size: 13px">{{ mail.sent_at }}</span>
-            </td>
-          </tr>
-        </table>
+        <div class="columns">
+          <div class="column is-one-half">
+            <table class="is-narrow is-fullwidth">
+              <tr>
+                <td class="mt-2">
+                  <span class="icon icn is-large">
+                    <i class="fa fa-user fa-2x"></i>
+                  </span>
+                </td>
+                <td style="width: 40rem">
+                  <p class="mt-1" style="font-size: 13px;"><strong>{{mail.sender_name}}</strong></p>
+                  <p class="mt-0" style="font-size: 13px;">{{mail.receiver_name}}</p>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div class="column is-one-half" style="text-align: right;">
+            <span class="mt-1 icon icn mr-2" data-name="Reply">
+              <i class="fa fa-reply" @click="replyMail(mail)"></i>
+            </span>
+            <span class="mt-1 icon icn mr-2" :data-name="mail.isStarred ? 'Starred' : 'Not Starred'">
+              <i class="fa fa-star" :style="{ color: mail.isStarred ? 'yellow' : '#e3e3e3' }" @click="starMail(mail.id)"></i>
+              <!-- <i class="fa fa-star" style="color: yellow;"></i> -->
+            </span>
+            <span class="mt-1 icon icn mr-2" data-name="Delete">
+              <i class="fa fa-trash" style="color: #c64524;" @click="trashOrDeleteMail(mail.id)"></i>
+            </span>
+            <span class="mt-1 icon icn mr-2" data-name="Forward">
+              <i class="fa fa-share" @click="forwardMail(mail)"></i>
+            </span>
+            <span style="font-size: 13px">{{ mail.sent_at }}</span>
+          </div>
+        </div>
         <div class="ml-6 mt-4 mb-6 pb-6">
           {{mail.message}}
         </div>
       </div>
     </div>
   </div>
+  <section class="section" v-if="compose === 1">
+    <div class="container">
+      <div class="compose-form">
+        <div class="control is-pulled-right">
+          <button class="button is-danger is-small" id="closeMail" @click="closeCompose">
+            <span class="icon is-small">
+              <i class="fa fa-close"></i>
+            </span>
+          </button>
+        </div>
+        <div class="box">
+          <form>
+            <div class="field is-small">
+              <label class="label">To:</label>
+              <div class="control">
+                <input class="input" v-model="formData.address" name="emailAddress" type="email" placeholder="Enter recipient email" required>
+              </div>
+            </div>
+
+            <div class="field is-small">
+              <label class="label">Subject:</label>
+              <div class="control">
+                <input class="input" v-model="formData.subject" name="emailSubject" type="text" placeholder="Enter email subject" required>
+              </div>
+            </div>
+
+            <div class="field is-large">
+              <label class="label">Message:</label>
+              <div class="control">
+                <textarea class="textarea" v-model="formData.emailContent" name="content" placeholder="Enter email message" required style="height: 300px;"></textarea>
+              </div>
+            </div>
+
+            <div class="field is-grouped">
+              <div class="control">
+                <button class="button is-primary" type="submit" @click="sendMail">Submit</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
 </div>
 
 [[block page_scripts]]
