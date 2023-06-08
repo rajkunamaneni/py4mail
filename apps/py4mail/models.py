@@ -34,7 +34,13 @@ db.define_table(
     Field('blocked_id', 'reference auth_user'),
 )
 
+
 db.commit()
+
+# UNCOMMENT THIS TO DELETE ALL ENTRIES IN THE EMAILS TABLE
+# table = db.emails
+# db(table.id > 0).delete()
+# db.commit()
 
 
 
