@@ -5,7 +5,7 @@ A Local Messaging Application
 Py4Mail is a locally-based email application specifically developed for facilitating communication between users. Inspired by popular email services like Gmail, Py4Mail offers a range of standard features including support for multiple user accounts, seamless sending and receiving of emails, as well as the ability to block and unblock users. The application is built using a combination of Vue.js, a JavaScript framework for building user interfaces, and py4web, a Python framework.
 
 ## Design and Documentation:
-This [Link](https://docs.google.com/document/d/1RwccH8KHGmGwVgCk6Ct0DpWRstz1xQFKqzbVGp4U9hM/edit?usp=sharing) has our intial design before creating py4mail. 
+This [Link](https://docs.google.com/document/d/1RwccH8KHGmGwVgCk6Ct0DpWRstz1xQFKqzbVGp4U9hM/edit?usp=sharing) has our initial design before creating py4mail. 
 This [Document](https://docs.google.com/document/d/1XgjrZY7rXYCJ02byCELfqm1AaKpADnwYl5Wegd5XHpY/edit?usp=sharing) explains the functionality and design of our project. 
 
 ## User Stories:
