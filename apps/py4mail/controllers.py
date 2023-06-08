@@ -16,7 +16,8 @@ def index():
                 delete_url = URL('delete'),
                 star_url = URL('star'),
                 get_sent_url = URL('get_sent'),
-                get_compose_url = URL('compose_mail'))
+                get_compose_url = URL('compose_mail'),
+                get_users_url = URL('get_users'))
 
 @action("get_emails")
 @action.uses(db, auth.user)
@@ -154,3 +155,10 @@ def compose_mail():
     )
 
     return "Mail sent successfully"
+
+@action("get_users")
+@action.uses(db, auth.user)
+def get_users():
+    # Implement. Lists all the users 
+    rows = db(db.auth_user).select().as_list()
+    return dict(users=rows)
