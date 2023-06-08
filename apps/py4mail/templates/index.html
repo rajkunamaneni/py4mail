@@ -39,7 +39,7 @@
   <div class="columns">
     <div class="column is-one-fifth">
       <div class="mb-2">
-        <a class="button is-medium" id="composeButton" style="border-radius: 20px">
+        <a class="button is-medium" id="composeButton" style="border-radius: 20px" @click="openCompose">
           <span class="icon">
             <i class="fa fa-edit"></i>
           </span>
@@ -97,32 +97,31 @@
       <table class="table table-first is-narrow is-fullwidth">
         <tbody>
           <tr class="field has-addons my-0 pt-2" v-for="email in emails" :key="email.id" class="email">
-            <td style="width: 4rem">
-              <span>
-                <label class="checkbox mt-1 mr-1">
-                  <input type="checkbox">
-                </label>
-                <span class="icon checkbox">
-                  <button class="fa fa-star"  :style="{ color: email.isStarred ? 'yellow' : '#e3e3e3' }" @click="starMail(email.id)"></button>
-                  <!-- <i class="fa fa-star"  style="color: yellow"></i> -->
-                </span>
-              </span>
-            </td>
-            <td style="width: 10rem" @click="() => {viewMail(email);}">
+            <td style="width: 15rem" @click="() => {viewMail(email);}">
               <span v-if="mailOption === 0">{{email.sender_name}}</span>
               <span v-if="mailOption === 2">To: {{email.receiver_name}}</span>
             </td>
-            <td style="width: 50rem"  @click="() => {viewMail(email);}">{{email.title}}</td>
+            <td style="width: 40rem"  @click="() => {viewMail(email);}">{{email.title}}</td>
             <td style="width: 8rem"  @click="() => {viewMail(email);}">{{email.elapsed_time}}</td>
+            <td style="width: 5rem">
+              <span>
+                <span class="icon checkbox" v-if="email.isTrash !== true">
+                  <i class="fa fa-star"  :style="{ color: email.isStarred ? 'yellow' : '#e3e3e3' }" @click="starMail(email.id)"></i>
+                </span>
+                <span class="mt-1 icon checkbox">
+                  <i class="fa fa-trash" style="color: #c64524;" @click="trashOrDeleteMail(mail.id)"></i>
+                </span>
+              </span>
+            </td>
           </tr>
           <!-- Add more email rows here -->
         </tbody>
       </table>
-      <section class="section" id="modal" style="display: none;">
+      <section class="section" id="modal" v-if="compose === 1">
         <div class="container">
           <div class="compose-form">
             <div class="control is-pulled-right">
-              <button class="button is-danger is-small" id="closeMail">
+              <button class="button is-danger is-small" id="closeMail" @click="closeCompose">
                 <span class="icon is-small">
                   <i class="fa fa-close"></i>
                 </span>
@@ -187,11 +186,11 @@
             </td>
             <td>
               <span class="mt-1 icon">
-                <button class="fa fa-star" :style="{ color: mail.isStarred ? 'yellow' : '#e3e3e3' }"></button>
+                <i class="fa fa-star" :style="{ color: mail.isStarred ? 'yellow' : '#e3e3e3' }"></i>
                 <!-- <i class="fa fa-star" style="color: yellow;"></i> -->
               </span>
               <span class="mt-1 icon">
-                <button class="fa fa-trash" style="color: #c64524;" @click="trashOrDeleteMail(mail.id)"></button>
+                <i class="fa fa-trash" style="color: #c64524;" @click="trashOrDeleteMail(mail.id)"></i>
               </span>
               <span style="font-size: 13px">{{ mail.sent_at }}</span>
             </td>
@@ -214,6 +213,7 @@
   let star_url = "[[=XML(star_url)]]";
   let get_sent_url = "[[=XML(get_sent_url)]]";
   let get_compose_url = "[[=XML(get_compose_url)]]";
+  let get_users_url = "[[=XML(get_users_url)]]";
 </script>
 <script src="js/vue.js"></script>
 <script src="js/axios.min.js"></script>
