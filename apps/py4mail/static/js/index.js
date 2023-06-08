@@ -122,18 +122,20 @@ let init = (app) => {
               }).then(function(response) {
                 app.vue.emails.splice(app.vue.emails.indexOf(email), 1);
                 delete app.vue.emails_as_dict[email];
+                app.methods.getMailbox();
               });
           } else {
             axios.post(trash_url,
               {
                 id: email.id,
               }).then(function(response) {
+                app.methods.starMail(email_id);
                 app.vue.emails.indexOf(email).isTrash = true;
+                app.methods.getMailbox();
               });
           }
         }
       });
-      app.methods.getTrash();
     },
     starMail: function(email_id) {
       axios.post(star_url,
