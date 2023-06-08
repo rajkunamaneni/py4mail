@@ -123,6 +123,7 @@ let init = (app) => {
               }
               app.vue.emails.splice(app.vue.emails.indexOf(email), 1);
               app.vue.emails.push(new_email);
+              app.methods.getInbox();
             }
           });
         });
