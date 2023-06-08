@@ -76,7 +76,6 @@
               </span>
               <span>Trash</span></a></li>
           </div>
-          <!-- <a class="is-active">Manage Your Team</a> -->
         </ul>
       </aside>
     </div>
@@ -84,7 +83,7 @@
       <div class="field mb-2">
         <div class="search-container">
           <span>
-            <input class="input" type="text" placeholder="Search in mail">
+            <input class="input" type="text" placeholder="Search in mail" v-model="searchQuery">
           </span>
           <span>
           <button class="button" id="back">
@@ -104,7 +103,7 @@
                   <input type="checkbox">
                 </label>
                 <span class="icon checkbox">
-                  <i class="fa fa-star"  :style="{ color: email.isStarred ? 'yellow' : '#e3e3e3' }" @click="starMail(email.id)"></i>
+                  <button class="fa fa-star"  :style="{ color: email.isStarred ? 'yellow' : '#e3e3e3' }" @click="starMail(email.id)"></button>
                   <!-- <i class="fa fa-star"  style="color: yellow"></i> -->
                 </span>
               </span>
@@ -113,8 +112,8 @@
               <span v-if="mailOption === 0">{{email.sender_name}}</span>
               <span v-if="mailOption === 2">To: {{email.receiver_name}}</span>
             </td>
-            <td style="width: 50rem" @click="() => {viewMail(email);}">{{email.title}}</td>
-            <td style="width: 8rem" @click="() => {viewMail(email);}">{{email.elapsed_time}}</td>
+            <td style="width: 50rem"  @click="() => {viewMail(email);}">{{email.title}}</td>
+            <td style="width: 8rem"  @click="() => {viewMail(email);}">{{email.elapsed_time}}</td>
           </tr>
           <!-- Add more email rows here -->
         </tbody>
@@ -188,11 +187,11 @@
             </td>
             <td>
               <span class="mt-1 icon">
-                <i class="fa fa-star" :style="{ color: mail.isStarred ? 'yellow' : '#e3e3e3' }"></i>
+                <button class="fa fa-star" :style="{ color: mail.isStarred ? 'yellow' : '#e3e3e3' }"></button>
                 <!-- <i class="fa fa-star" style="color: yellow;"></i> -->
               </span>
               <span class="mt-1 icon">
-                <i class="fa fa-trash" style="color: #c64524;" @click="trashOrDeleteMail(mail.id)"></i>
+                <button class="fa fa-trash" style="color: #c64524;" @click="trashOrDeleteMail(mail.id)"></button>
               </span>
               <span style="font-size: 13px">{{ mail.sent_at }}</span>
             </td>

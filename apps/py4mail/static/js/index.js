@@ -5,8 +5,10 @@ let init = (app) => {
   app.data = {
     emails: [],
     emails_as_dict: {},
+    searchQuery: '',
     mailOption: 0, // 0 = list, 1 = individual mail
-    mail: {}
+    mail: {},
+    emails_for_search: [],
   };
 
   app.enumerate = (a) => {
@@ -17,6 +19,7 @@ let init = (app) => {
     });
     return a;
   };
+  
 
   // This contains all the methods.
   app.methods = {
@@ -45,7 +48,7 @@ let init = (app) => {
 
     //get the mails from inbox
     getInbox: function() {
-      app.methods.getGlobal(null, 'isTrash');
+      app.methods.getGlobal(false, 'isTrash');
     },    
     getSent: function() {
       app.vue.mailOption = 2;
@@ -134,12 +137,27 @@ let init = (app) => {
     el: "#vue-target",
     data: app.data,
     methods: app.methods,
+    watch: {
+      searchQuery: function(query) {
+        console.log(app.data.searchQuery);
+        if(app.data.searchQuery == "") {
+          app.methods.getInbox();
+        } else {
+          var query = app.data.searchQuery.toLowerCase();
+          app.vue.emails = app.vue.emails_for_search.filter(email => email.sender_name.toLowerCase().startsWith(query));
+        }
+      }
+    },
   });
 
   // And this initializes it.
   app.init = () => {
     //get mails from inbox by default
     app.methods.getInbox();
+    axios.get(get_emails_url).then(function(response) {
+      app.vue.emails_for_search = app.enumerate(response.data.emails);
+
+    });
   };
 
   // Call to the initializer.
