@@ -6,9 +6,13 @@ let init = (app) => {
     emails: [],
     emails_as_dict: {},
     searchQuery: '',
-    mailOption: 0, // 0 = list, 1 = individual mail, 2 = sent emails
+    mailOption: 0, // 0 = list, 1 = individual mail, 2 = sent list, 2 = sent emails
     mail: {},
     emails_for_search: [],
+    email_addresses: [],
+    compose: 0,
+    formData: {address:'', subject:'', emailContent:''},
+    currentMailbox: 'inbox',
     blocked_me: [],
   };
 
@@ -20,19 +24,17 @@ let init = (app) => {
     });
     return a;
   };
-  
 
   // This contains all the methods.
   app.methods = {
     formatEmailsByTime: function () {
-      app.vue.emails.sort(function (a, b) {
-        return new Date(b.sent_at) - new Date(a.sent_at);
-      });
+      app.vue.emails.sort((a, b) => new Date(b.sent_at) - new Date(a.sent_at));
     },
-
+    
     //One function that get the information for the three different types of mails
     //param of `type` to get the mails from inbox, trash, or starred
     getGlobal: function(type, isType) {
+      app.vue.emails = [];
       app.vue.mailOption = 0;
       app.data.emails_as_dict = {};
       axios.get(get_emails_url).then(function(response) {
@@ -46,41 +48,64 @@ let init = (app) => {
         app.methods.formatEmailsByTime();
       });
     },
-
+    getMailbox: function() {
+      let mailbox = app.vue.currentMailbox;
+      if (mailbox === "inbox") {
+        app.methods.getInbox();
+      }
+      else if (mailbox === "starred") {
+        app.methods.getStarred();
+      }
+      else if (mailbox === "sent") {
+        app.methods.getSent();
+      }
+      else if (mailbox === "trash") {
+        app.methods.getTrash();
+      }
+    },
     //get the mails from inbox
     getInbox: function() {
+      app.vue.currentMailbox = 'inbox';
       app.methods.getGlobal(false, 'isTrash');
     },    
     getSent: function() {
+      app.vue.currentMailbox = 'sent';
       app.vue.mailOption = 2;
       axios.get(get_sent_url).then(function(response) {
-        app.vue.emails = app.enumerate(response.data.emails);
+        app.vue.emails = app.enumerate(response.data.emails).filter(function(email){
+          if(email['isTrash'] !== true) {
+            return true;
+          } else {
+            return false;
+          }
+        });
         app.methods.formatEmailsByTime();
       });
     },
     //get the mails from trash
     getTrash: function() {
+      app.vue.currentMailbox = 'trash';
       app.methods.getGlobal(true, 'isTrash');
     },
 
     //get the mails from starred
     getStarred: function() { 
+      app.vue.currentMailbox = 'starred';
       app.methods.getGlobal(true, 'isStarred');
     },
-
     // view individual mail 
     viewMail: function(email_id) {
       app.vue.mailOption = 1; //switch to individual mail
       app.vue.mail = email_id;
     },
     compose_mail: function(email) {
-      console.log(email);
       // use the api to send the email
       axios
       .post(get_compose_url, { email: { receiver_mail: email.receiver_mail, title: email.title, content: email.content } })
       .then(function(response) {
         if (response.data === "Mail sent successfully") {
-          app.methods.getInbox();
+          // app.methods.getInbox();
+          console.log("Success");
         }      
       })
       .catch(function(error) {
@@ -98,20 +123,21 @@ let init = (app) => {
               }).then(function(response) {
                 app.vue.emails.splice(app.vue.emails.indexOf(email), 1);
                 delete app.vue.emails_as_dict[email];
+                app.methods.getMailbox();
               });
           } else {
             axios.post(trash_url,
               {
                 id: email.id,
               }).then(function(response) {
+                app.methods.starMail(email_id);
                 app.vue.emails.indexOf(email).isTrash = true;
+                app.methods.getMailbox();
                 app.vue.emails.indexOf(email).isStarred = false;
               });
           }
         }
-
       });
-      
     },
     starMail: function(email_id) {
       axios.post(star_url,
@@ -128,6 +154,64 @@ let init = (app) => {
             }
           });
         });
+    },
+    openCompose: function() {
+      app.vue.compose = 1;
+    },
+    closeCompose: function() {
+      app.vue.compose = 0;
+      app.vue.formData.address = '';
+      app.vue.formData.emailContent = '';
+      app.vue.formData.subject = '';
+    },
+    replyMail: function(email) {
+      if (!email.title.startsWith("Re:")) {
+        app.vue.formData.subject = 'Re: ' + email.title;
+      } else {
+        app.vue.formData.subject = email.title;
+      }
+      app.vue.formData.address = email.sender_email;
+      app.methods.openCompose();
+    },
+    forwardMail: function(email) {
+      console.log(email);
+      if (!email.title.startsWith("Fwd:")) {
+        app.vue.formData.subject = 'Fwd: ' + email.title;
+      } else {
+        app.vue.formData.subject = email.title;
+      }
+      app.vue.formData.emailContent = email.message;
+      app.methods.openCompose();
+    },
+    setcurrentMailbox: function(mailbox) {
+      app.vue.currentMailbox = mailbox;
+      app.methods.getMailbox();
+    },
+    sendMail() {
+      // Access the form data
+      if (!app.vue.email_addresses.includes(app.vue.formData.address)) {
+        window.alert("Not a valid email address");
+      } else {
+        const email = {
+          receiver_mail: app.vue.formData.address,
+          title: app.vue.formData.subject,
+          content: app.vue.formData.emailContent
+        };
+        axios
+          .post(get_compose_url, email)
+          .then(function(response) {
+            if (response.data === "Mail sent successfully") {
+              app.methods.getMailbox();
+              console.log("Success!!");
+            } else {
+              console.log("Noooo");
+            }
+          })
+          .catch(function(error) {
+            console.error(error);
+          });
+        app.methods.closeCompose();
+      }
     },
     blockUser: function(email_id) {
       axios.post(blocked_url,
@@ -160,50 +244,20 @@ let init = (app) => {
   // And this initializes it.
   app.init = () => {
     //get mails from inbox by default
-    app.methods.getInbox();
     axios.get(get_emails_url).then(function(response) {
       app.vue.emails_for_search = app.enumerate(response.data.emails);
       app.vue.blocked_me = app.enumerate(response.data.blocked_list);
     });
+    axios.get(get_users_url).then(function(response) {
+      response.data.users.map(function(user) {
+        app.vue.email_addresses.push(user.email);
+      });
+    })
+    app.methods.getMailbox();
   };
 
   // Call to the initializer.
   app.init();
-  
-  const composeButton = document.getElementById('composeButton');
-  const modal = document.getElementById('modal');
-  const receiver_mail = document.getElementById('address');
-  const title = document.getElementById('subject');
-  const emailContent = document.getElementById('emailContent');
-  const sendButton = document.getElementById('sendButton');
-  
-  // show the email form
-  composeButton.addEventListener('click', () => {
-    modal.style.display = 'block';  // show the form
-  });
-  // call compose_email to send the email
-  sendButton.addEventListener('click', () => {
-    // get the content for the email
-    let email = {};
-    email.receiver_mail = receiver_mail.value;
-    email.title = title.value;
-    email.content = emailContent.value;
-
-    // Reset the fields
-    receiver_mail.value = '';
-    title.value = '';
-    emailContent.value = '';
-    modal.style.display = 'none'; // hide the form
-    app.methods.compose_mail(email);
-  });
-
-  closeMail.addEventListener('click', () => {
-    // reset the field
-    receiver_mail.value = '';
-    title.value = '';
-    emailContent.value = '';
-    modal.style.display = 'none';   // hide the form
-  });
 };
 
 // This takes the (empty) app object, and initializes it,

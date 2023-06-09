@@ -17,6 +17,7 @@ def index():
                 star_url = URL('star'),
                 get_sent_url = URL('get_sent'),
                 get_compose_url = URL('compose_mail'),
+                get_users_url = URL('get_users'),
                 blocked_url = URL('blocked'),)
 
 @action("get_emails")
@@ -29,6 +30,7 @@ def get_emails():
     sender_ids = [email['sender_id'] for email in emails]
     sender_info = db(db.auth_user.id.belongs(sender_ids)).select()
     sender_names = {sender.id: f"{sender.first_name} {sender.last_name}" for sender in sender_info}
+    sender_emails = {sender.id: sender.email for sender in sender_info}
 
     # Retrieve receiver name from auth_user table
     receiver_info = db.auth_user[auth.user_id]
@@ -37,9 +39,10 @@ def get_emails():
     # Add sender, receiver names, and elapsed time to the list
     for email in emails:
         email['sender_name'] = sender_names.get(email['sender_id'])
+        email['sender_email'] = sender_emails.get(email['sender_id'])
         email['receiver_name'] = receiver_name
+        email['receiver_email'] = receiver_info.email
         email['elapsed_time'] = get_elapsed_time(email['sent_at'])
-    print(emails)
     return dict(emails=emails,
                 blocked_list=blocked_list,)
 
@@ -73,6 +76,7 @@ def get_sent():
     receiver_ids = [email['receiver_id'] for email in emails]
     receiver_info = db(db.auth_user.id.belongs(receiver_ids)).select()
     receiver_names = {receiver.id: f"{receiver.first_name} {receiver.last_name}" for receiver in receiver_info}
+    receiver_emails = {receiver.id: receiver.email for receiver in receiver_info}
 
     # Retrieve receiver name from auth_user table
     sender_info = db.auth_user[auth.user_id]
@@ -81,7 +85,9 @@ def get_sent():
     # Add sender, receiver names, and elapsed time to the list
     for email in emails:
         email['receiver_name'] = receiver_names.get(email['receiver_id'])
+        email['receiver_email'] = receiver_emails.get(email['receiver_id'])
         email['sender_name'] = sender_name
+        email['sender_email'] = sender_info.email
         email['elapsed_time'] = get_elapsed_time(email['sent_at'])
     return dict(emails=emails)
 
@@ -127,23 +133,24 @@ def blocked():
     return dict(blocked_list = blocked_list,)
 
 
-@action('compose_mail', method=['GET', 'POST'])
+@action('compose_mail', method=['POST'])
 @action.uses(db, session, auth.user)
 def compose_mail():
-    email = request.json.get('email')
-    # email = {receiver_mail: 'test@gmail.com', title: 'This is the title', content: 'This is the content of the email'}
-    print('This is the email', email)
-    # Extract email fields
+    email = request.json
+
+    if email is None:
+        return "Failure"
+    # # Extract email fields
     receiver_mail = email.get('receiver_mail')
     title = email.get('title')
     content = email.get('content')
 
     # Get sender and receiver user objects
     sender = auth.get_user()
-    sender_id = sender.id if sender else None
+    sender_id = sender["id"] if sender else None
 
     receiver = db(db.auth_user.email == receiver_mail).select().first()
-    receiver_id = receiver.id if receiver else None
+    receiver_id = receiver["id"] if receiver else None
 
     # Insert the email data into the database
     db.emails.insert(
@@ -155,5 +162,11 @@ def compose_mail():
         isStarred=False,
         isTrash=False
     )
-
     return "Mail sent successfully"
+
+@action("get_users")
+@action.uses(db, auth.user)
+def get_users():
+    # Implement. Lists all the users 
+    rows = db(db.auth_user).select().as_list()
+    return dict(users=rows)
