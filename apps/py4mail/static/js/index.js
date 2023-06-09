@@ -14,6 +14,7 @@ let init = (app) => {
     formData: {address:'', subject:'', emailContent:''},
     currentMailbox: 'inbox',
     blocked: [],
+    my_info: {},
   };
 
   app.enumerate = (a) => {
@@ -246,6 +247,7 @@ let init = (app) => {
     //get mails from inbox by default
     axios.get(get_emails_url).then(function(response) {
       app.vue.emails_for_search = app.enumerate(response.data.emails);
+      app.vue.my_info = response.data.my_info;
     });
     axios.get(get_users_url).then(function(response) {
       response.data.users.map(function(user) {
@@ -254,6 +256,10 @@ let init = (app) => {
     })
     app.methods.getMailbox();
   };
+  axios.get(cant_send_url).then(function(response) {
+    app.vue.i_blocked = app.enumerate(response.data.i_blocked);
+    app.vue.blocked_me = app.enumerate(response.data.blocked_me);
+  });
 
   // Call to the initializer.
   app.init();

@@ -24,8 +24,12 @@ def index():
 @action("get_emails")
 @action.uses(db, auth.user)
 def get_emails():
+    my_info = {}
     emails = db(db.emails.receiver_id == auth.user_id).select().as_list()
-
+    users = db(db.auth_user).select().as_list()
+    for user in users:
+        if user['id'] == auth.user_id:
+            my_info = user
     # Retrieve sender names from auth_user table
     sender_ids = [email['sender_id'] for email in emails]
     sender_info = db(db.auth_user.id.belongs(sender_ids)).select()
@@ -43,7 +47,7 @@ def get_emails():
         email['receiver_name'] = receiver_name
         email['receiver_email'] = receiver_info.email
         email['elapsed_time'] = get_elapsed_time(email['sent_at'])
-    return dict(emails=emails,)
+    return dict(emails=emails, my_info=my_info,)
 
 def get_elapsed_time(created_on):
     now = datetime.datetime.utcnow()
