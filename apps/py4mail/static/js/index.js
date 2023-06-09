@@ -6,13 +6,14 @@ let init = (app) => {
     emails: [],
     emails_as_dict: {},
     searchQuery: '',
-    mailOption: 0, // 0 = list, 1 = individual mail, 2 = sent list
+    mailOption: 0, // 0 = list, 1 = individual mail, 2 = sent list, 2 = sent emails
     mail: {},
     emails_for_search: [],
     email_addresses: [],
     compose: 0,
     formData: {address:'', subject:'', emailContent:''},
     currentMailbox: 'inbox',
+    blocked: [],
   };
 
   app.enumerate = (a) => {
@@ -118,7 +119,7 @@ let init = (app) => {
           if (email.isTrash === true) {
             axios.post(delete_url,
               {
-                id: email.id,
+                id: email_id,
               }).then(function(response) {
                 app.vue.emails.splice(app.vue.emails.indexOf(email), 1);
                 delete app.vue.emails_as_dict[email];
@@ -127,11 +128,12 @@ let init = (app) => {
           } else {
             axios.post(trash_url,
               {
-                id: email.id,
+                id: email_id,
               }).then(function(response) {
                 app.methods.starMail(email_id);
                 app.vue.emails.indexOf(email).isTrash = true;
                 app.methods.getMailbox();
+                app.vue.emails.indexOf(email).isStarred = false;
               });
           }
         }
@@ -210,7 +212,15 @@ let init = (app) => {
           });
         app.methods.closeCompose();
       }
-    }
+    },
+    blockUser: function(email) {
+      axios.post(blocked_url,
+        {
+          id: email.sender_id,
+        }).then(function(response){
+          app.vue.blocked = response.data.blocked_list;
+        });
+    },
   };
 
   // This creates the Vue instance.

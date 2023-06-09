@@ -17,7 +17,9 @@ def index():
                 star_url = URL('star'),
                 get_sent_url = URL('get_sent'),
                 get_compose_url = URL('compose_mail'),
-                get_users_url = URL('get_users'))
+                get_users_url = URL('get_users'),
+                blocked_url = URL('blocked'),
+                cant_send_url = URL('cant_send'),)
 
 @action("get_emails")
 @action.uses(db, auth.user)
@@ -41,7 +43,7 @@ def get_emails():
         email['receiver_name'] = receiver_name
         email['receiver_email'] = receiver_info.email
         email['elapsed_time'] = get_elapsed_time(email['sent_at'])
-    return dict(emails=emails)
+    return dict(emails=emails,)
 
 def get_elapsed_time(created_on):
     now = datetime.datetime.utcnow()
@@ -94,6 +96,7 @@ def move_to_trash():
     mail_id = request.json.get('id')
     email = db.emails(mail_id)
     email.update_record(isTrash=True)
+    email.update_record(isStarred=False)
     return dict(mail_id=mail_id,)
 
 
@@ -115,6 +118,9 @@ def star():
     else:
         email.update_record(isStarred = True)
         starred = True
+    if email.isTrash == True:
+        email.update_record(isStarred = False)
+        starred = False
     return dict(mail_id = mail_id,
                 starred = starred)
 
@@ -122,13 +128,18 @@ def star():
 @action("blocked", method="POST")
 @action.uses(db, auth.user)
 def blocked():
+    already_blocked = False
     data = request.json
     user_id = data.get('id')
-    block_user = db((db.blocked.created_by == auth.user_id) & (db.blocked.blocked_id == auth.user_id)).select().first()
-    if block_user:
-        block_user.delete_record(db.blocked[0]['id'])
-    else:
-        db.blocked.insert(created_by=auth.user_id, blocked_id=user_id)
+    blocked_users = db(db.blocked).select().as_list()
+    for entry in blocked_users:
+        if entry['created_by'] == auth.user_id and entry['blocked_id'] == user_id:
+            already_blocked = True
+    if already_blocked == False:
+        block_user = db.blocked.insert(created_by=auth.user_id, blocked_id=user_id)
+    blocked_list = db().select(db.blocked.ALL).as_list()
+    return dict(blocked_list = blocked_list,)
+
 
 @action('compose_mail', method=['POST'])
 @action.uses(db, session, auth.user)
@@ -155,7 +166,7 @@ def compose_mail():
         receiver_id=receiver_id,
         title=title,
         message=content,
-        sent_at=datetime.datetime.now(),
+        sent_at=datetime.datetime.utcnow(),
         isStarred=False,
         isTrash=False
     )
@@ -167,3 +178,11 @@ def get_users():
     # Implement. Lists all the users 
     rows = db(db.auth_user).select().as_list()
     return dict(users=rows)
+
+@action("cant_send")
+@action.uses(db, auth.user)
+def cant_send():
+    i_blocked = db(db.blocked.created_by == auth.user_id).select().as_list()
+    blocked_me = db(db.blocked.blocked_id == auth.user_id).select().as_list()
+    return dict(i_blocked=i_blocked,
+                blocked_me=blocked_me)
