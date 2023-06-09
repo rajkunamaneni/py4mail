@@ -1,6 +1,5 @@
 
 import datetime
-import random
 
 from py4web import action, request, abort, redirect, URL
 from yatl.helpers import A
@@ -143,7 +142,6 @@ def blocked():
         block_user = db.blocked.insert(created_by=auth.user_id, blocked_id=user_id)
     blocked_list = db().select(db.blocked.ALL).as_list()
     return dict(blocked_list = blocked_list,)
-
 
 @action('compose_mail', method=['POST'])
 @action.uses(db, session, auth.user)
