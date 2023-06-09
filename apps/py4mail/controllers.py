@@ -7,9 +7,6 @@ from .common import db, session, T, cache, auth, logger, authenticated, unauthen
 from py4web.utils.url_signer import URLSigner
 from .models import get_username
 
-
-
-
 @action('index')
 @action.uses('index.html', db, auth.user)
 def index():
@@ -122,6 +119,9 @@ def star():
     else:
         email.update_record(isStarred = True)
         starred = True
+    if email.isTrash == True:
+        email.update_record(isStarred = False)
+        starred = False
     return dict(mail_id = mail_id,
                 starred = starred)
 
@@ -129,8 +129,15 @@ def star():
 @action("blocked", method="POST")
 @action.uses(db, auth.user)
 def blocked():
+    already_blocked = False
     data = request.json
     user_id = data.get('id')
+    blocked_users = db(db.blocked).select().as_list()
+    for entry in blocked_users:
+        if entry['created_by'] == auth.user_id and entry['blocked_id'] == user_id:
+            already_blocked = True
+    if already_blocked == False:
+        block_user = db.blocked.insert(created_by=auth.user_id, blocked_id=user_id)
     block_user = db.blocked.insert(created_by=auth.user_id, blocked_id=user_id)
     blocked_list = db(db.blocked.blocked_id == auth.user_id).select().as_list()
     return dict(blocked_list = blocked_list,)
