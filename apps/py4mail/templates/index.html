@@ -178,7 +178,7 @@
               <!-- <i class="fa fa-star" style="color: yellow;"></i> -->
             </span>
             <span class="mt-1 icon checkbox">
-              <i class="fa fa-ban" style="color: #ababab;" @click="blockEmail(email.id)"></i>
+              <i class="fa fa-ban" style="color: #ababab;" @click="blockUser(mail)"></i>
             </span><!-- This is the Block Button  -->
             <span class="mt-1 icon icn mr-2" data-name="Delete">
               <i class="fa fa-trash" style="color: #c64524;" @click="trashOrDeleteMail(mail.id)"></i>
@@ -251,6 +251,7 @@
   let get_compose_url = "[[=XML(get_compose_url)]]";
   let get_users_url = "[[=XML(get_users_url)]]";
   let blocked_url = "[[=XML(blocked_url)]]";
+  let cant_send_url = "[[=XML(cant_send_url)]]";
 </script>
 <script src="js/vue.js"></script>
 <script src="js/axios.min.js"></script>

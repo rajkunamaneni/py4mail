@@ -13,7 +13,7 @@ let init = (app) => {
     compose: 0,
     formData: {address:'', subject:'', emailContent:''},
     currentMailbox: 'inbox',
-    blocked_me: [],
+    blocked: [],
   };
 
   app.enumerate = (a) => {
@@ -119,7 +119,7 @@ let init = (app) => {
           if (email.isTrash === true) {
             axios.post(delete_url,
               {
-                id: email.id,
+                id: email_id,
               }).then(function(response) {
                 app.vue.emails.splice(app.vue.emails.indexOf(email), 1);
                 delete app.vue.emails_as_dict[email];
@@ -128,7 +128,7 @@ let init = (app) => {
           } else {
             axios.post(trash_url,
               {
-                id: email.id,
+                id: email_id,
               }).then(function(response) {
                 app.methods.starMail(email_id);
                 app.vue.emails.indexOf(email).isTrash = true;
@@ -213,12 +213,12 @@ let init = (app) => {
         app.methods.closeCompose();
       }
     },
-    blockUser: function(email_id) {
+    blockUser: function(email) {
       axios.post(blocked_url,
         {
-          id: email_id,
+          id: email.sender_id,
         }).then(function(response){
-          app.vue.blocked_me = response.data.blocked_list;
+          app.vue.blocked = response.data.blocked_list;
         });
     },
   };
@@ -246,7 +246,6 @@ let init = (app) => {
     //get mails from inbox by default
     axios.get(get_emails_url).then(function(response) {
       app.vue.emails_for_search = app.enumerate(response.data.emails);
-      app.vue.blocked_me = app.enumerate(response.data.blocked_list);
     });
     axios.get(get_users_url).then(function(response) {
       response.data.users.map(function(user) {
