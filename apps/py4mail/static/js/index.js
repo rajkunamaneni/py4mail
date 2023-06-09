@@ -5,6 +5,7 @@ let init = (app) => {
   app.data = {
     emails: [],
     emails_as_dict: {},
+    users: [],
     searchQuery: '',
     mailOption: 0, // 0 = list, 1 = individual mail, 2 = sent list, 2 = sent emails
     mail: {},
@@ -13,7 +14,8 @@ let init = (app) => {
     compose: 0,
     formData: {address:'', subject:'', emailContent:''},
     currentMailbox: 'inbox',
-    blocked: [],
+    i_blocked: [],
+    blocked_me: [],
     my_info: {},
   };
 
@@ -189,9 +191,38 @@ let init = (app) => {
       app.methods.getMailbox();
     },
     sendMail() {
-      // Access the form data
-      if (!app.vue.email_addresses.includes(app.vue.formData.address)) {
+      axios.get(cant_send_url).then(function(response) {
+        app.vue.i_blocked = app.enumerate(response.data.i_blocked);
+        app.vue.blocked_me = app.enumerate(response.data.blocked_me);
+      });
+      address = app.vue.formData.address;
+      id = 0;
+      id_i_blocked = [];
+      id_blocked_me = [];
+      app.vue.users.forEach(function(user) {
+        if (address === user.email) {
+          id = user.id;
+          console.log(id);
+        }
+      });
+      app.vue.i_blocked.forEach(function(user){
+        if (user.blocked_id === id) {
+          id_i_blocked.push(user.blocked_id);
+        }
+      });
+      app.vue.blocked_me.forEach(function(user){
+        if (user.created_by === id) {
+          id_blocked_me.push(user.created_by);
+        }
+      });
+      if(id_i_blocked.includes(id)){
+        window.alert("You blocked them!")
+      } else if (id_blocked_me.includes(id)){
+        window.alert("You're blocked!")
+      } else if (!app.vue.email_addresses.includes(app.vue.formData.address)) {
         window.alert("Not a valid email address");
+
+      // Access the form data
       } else {
         const email = {
           receiver_mail: app.vue.formData.address,
@@ -253,6 +284,7 @@ let init = (app) => {
       response.data.users.map(function(user) {
         app.vue.email_addresses.push(user.email);
       });
+      app.vue.users = app.enumerate(response.data.users);
     })
     app.methods.getMailbox();
   };
