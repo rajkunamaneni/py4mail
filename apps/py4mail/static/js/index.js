@@ -6,9 +6,10 @@ let init = (app) => {
     emails: [],
     emails_as_dict: {},
     searchQuery: '',
-    mailOption: 0, // 0 = list, 1 = individual mail
+    mailOption: 0, // 0 = list, 1 = individual mail, 2 = sent emails
     mail: {},
     emails_for_search: [],
+    blocked_me: [],
   };
 
   app.enumerate = (a) => {
@@ -104,6 +105,7 @@ let init = (app) => {
                 id: email.id,
               }).then(function(response) {
                 app.vue.emails.indexOf(email).isTrash = true;
+                app.vue.emails.indexOf(email).isStarred = false;
               });
           }
         }
@@ -125,6 +127,14 @@ let init = (app) => {
               }
             }
           });
+        });
+    },
+    blockUser: function(email_id) {
+      axios.post(blocked_url,
+        {
+          id: email_id,
+        }).then(function(response){
+          app.vue.blocked_me = response.data.blocked_list;
         });
     },
   };
@@ -153,7 +163,7 @@ let init = (app) => {
     app.methods.getInbox();
     axios.get(get_emails_url).then(function(response) {
       app.vue.emails_for_search = app.enumerate(response.data.emails);
-
+      app.vue.blocked_me = app.enumerate(response.data.blocked_list);
     });
   };
 
