@@ -101,20 +101,6 @@ let init = (app) => {
       app.vue.mailOption = 1; //switch to individual mail
       app.vue.mail = email_id;
     },
-    compose_mail: function(email) {
-      // use the api to send the email
-      axios
-      .post(get_compose_url, { email: { receiver_mail: email.receiver_mail, title: email.title, content: email.content } })
-      .then(function(response) {
-        if (response.data === "Mail sent successfully") {
-          // app.methods.getInbox();
-          console.log("Success");
-        }      
-      })
-      .catch(function(error) {
-        console.error(error);
-      });
-    },
     // trash or delete the email
     trashOrDeleteMail: function(email_id) {
       app.vue.emails.forEach(function(email){
@@ -160,6 +146,10 @@ let init = (app) => {
     },
     openCompose: function() {
       app.vue.compose = 1;
+      axios.get(cant_send_url).then(function(response) {
+        app.vue.i_blocked = app.enumerate(response.data.i_blocked);
+        app.vue.blocked_me = app.enumerate(response.data.blocked_me);
+      });
     },
     closeCompose: function() {
       app.vue.compose = 0;
@@ -191,10 +181,6 @@ let init = (app) => {
       app.methods.getMailbox();
     },
     sendMail() {
-      axios.get(cant_send_url).then(function(response) {
-        app.vue.i_blocked = app.enumerate(response.data.i_blocked);
-        app.vue.blocked_me = app.enumerate(response.data.blocked_me);
-      });
       address = app.vue.formData.address;
       id = 0;
       id_i_blocked = [];
