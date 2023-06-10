@@ -130,7 +130,7 @@
                 <span class="icon checkbox" v-if="email.isTrash !== true" @click="starMail(email.id)">
                   <i class="fa fa-star"  :style="{ color: email.isStarred ? 'yellow' : '#e3e3e3' }"></i>
                 </span>
-                <span class="mt-1 icon" @click="trashOrDeleteMail(email.id)">
+                <span class="mt-1 icon" @click="trashOrDeleteMail(email.id)" v-if="mailOption !== 2">
                   <i class="fa fa-trash" style="color: #c64524;"></i>
                 </span>
               </span>
