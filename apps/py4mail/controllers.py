@@ -97,7 +97,7 @@ def move_to_trash():
     mail_id = request.json.get('id')
     email = db.emails(mail_id)
     email.update_record(isTrash=True)
-    email.updated_record(isStarred=False)
+    email.update_record(isStarred=False)
     return dict(mail_id=mail_id,)
 
 
@@ -138,7 +138,6 @@ def blocked():
             already_blocked = True
     if already_blocked == False:
         block_user = db.blocked.insert(created_by=auth.user_id, blocked_id=user_id)
-    block_user = db.blocked.insert(created_by=auth.user_id, blocked_id=user_id)
     blocked_list = db(db.blocked.blocked_id == auth.user_id).select().as_list()
     return dict(blocked_list = blocked_list,)
 
