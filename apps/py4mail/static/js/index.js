@@ -248,6 +248,7 @@ let init = (app) => {
     methods: app.methods,
     watch: {
       searchQuery: function(query) {
+        app.methods.getMailbox();
         console.log(app.data.searchQuery);
         if(app.data.searchQuery == "") {
           app.methods.getInbox();
