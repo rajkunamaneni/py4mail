@@ -37,6 +37,6 @@ db.define_table(
 db.commit()
 
 # UNCOMMENT THIS TO DELETE ALL ENTRIES IN THE EMAILS TABLE
-# table = db.emails
-# db(table.id > 0).delete()
-# db.commit()
+table = db.emails
+db(table.id > 0).delete()
+db.commit()
