@@ -1,4 +1,3 @@
-
 import datetime
 
 from py4web import action, request, abort, redirect, URL
