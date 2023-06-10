@@ -89,6 +89,7 @@ def get_sent():
         email['sender_name'] = sender_name
         email['sender_email'] = sender_info.email
         email['elapsed_time'] = get_elapsed_time(email['sent_at'])
+    
     return dict(emails=emails)
 
 @action("move_to_trash", method="POST")
